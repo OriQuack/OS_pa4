@@ -89,12 +89,12 @@ kalloc(void)
 {
   struct run *r;
 
-//try_again:
+try_again:
   if(kmem.use_lock)
     acquire(&kmem.lock);
   r = kmem.freelist;
-//  if(!r && reclaim())
-//	  goto try_again;
+ if(!r && reclaim())
+	  goto try_again;
   if(r)
     kmem.freelist = r->next;
   if(kmem.use_lock)

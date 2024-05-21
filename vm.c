@@ -7,6 +7,10 @@
 #include "proc.h"
 #include "elf.h"
 
+// MYCODE
+struct page *lru_list[PHYSTOP / PGSIZE];
+struct page **lru_head;
+
 extern char data[];  // defined by kernel.ld
 pde_t *kpgdir;  // for use in scheduler()
 
@@ -392,3 +396,14 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
 //PAGEBREAK!
 // Blank page.
 
+// MYCODE
+void lru_list_init() { 
+  char* mem;
+  if((mem = kalloc()) == 0)
+    panic("lru_list_init no memory");
+  memset(mem, 0, PGSIZE);
+  for(int i = 0; i < PHYSTOP / PGSIZE; i++){
+    lru_list[i] = (struct page*)(mem + sizeof(struct page) * i);
+  }
+  lru_head = lru_list[0];
+}
