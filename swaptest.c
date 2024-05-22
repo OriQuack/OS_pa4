@@ -11,6 +11,22 @@
 
 int main () {
 	int a, b;
+  swapstat(&a, &b);
+  printf(1, "%d %d\n", a, b);
 
-    swapstat(&a, &b);
+  for(int i = 0; i < 500; i++){
+    sbrk(4096);
+  }
+
+  swapstat(&a, &b);
+  printf(1, "%d %d\n", a, b);
+
+  for(int i = 0; i < 500; i++){
+    sbrk(4096);
+  }
+
+  swapstat(&a, &b);
+  printf(1, "%d %d\n", a, b);
+
+  exit();
 }
