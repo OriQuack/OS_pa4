@@ -13,6 +13,9 @@
 
 
 int main(){
-  printf(1, "Hello");
+  for(int i = 0; i < 500; i++){
+    sbrk(4096);
+  }
+
   exit();
 }
