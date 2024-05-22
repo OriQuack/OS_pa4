@@ -140,7 +140,7 @@ int evict(){
         char bitmap = swap_track[i];
         cprintf("%d\n", bitmap);
         for(int j = 0; j < 8; j++){
-          if((bitmap & (1 << j)) == 0){
+          if(!(bitmap & (1 << j))){
             offset = 8 * (i * 8 + j);
             swap_track[i] |= (1 << j);
             break;
