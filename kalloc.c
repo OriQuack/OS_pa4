@@ -89,35 +89,6 @@ kfree(char *v)
   num_free_pages++;
 }
 
-// Allocate one 4096-byte page of physical memory.
-// Returns a pointer that the kernel can use.
-// Returns 0 if the memory cannot be allocated.
-char*
-kalloc(void)
-{
-  struct run *r;
-
-try_again:
-  if(kmem.use_lock)
-    acquire(&kmem.lock);
-  r = kmem.freelist;
-  if(!r){
-    if(evict() == 0){
-      return 0;
-    }
-	  goto try_again;
-  }
-  if(r)
-    kmem.freelist = r->next;
-  if(kmem.use_lock)
-    release(&kmem.lock);
-  // MYCODE
-  struct page *p = &pages[V2P((char*)r) / PGSIZE];
-  p->vaddr = (char*)r;
-  num_free_pages--;
-  return (char*)r;
-}
-
 // MYCODE
 void pages_init() { 
   char* mem;
@@ -131,7 +102,6 @@ void pages_init() {
     pages[i].prev = 0;
     pages[i].vaddr = 0;
   }
-  page_lru_head->next = mem;
   num_lru_pages = 0;
   if((mem = kalloc()) == 0)
     panic("pages_init no memory");
@@ -175,12 +145,41 @@ int evict(){
           }
         }
       }
-      swapwrite(V2P(va), offset);
-      *pte = pte_ADDR(*pte) ^ *pte | offset;
+      swapwrite((char *)V2P(va), offset);
+      *pte = (PTE_ADDR(*pte) ^ *pte) | offset;
       *pte = *pte & !PTE_P;
       break;
     }
   }
   return 1;
 }
+// ~
 
+// Allocate one 4096-byte page of physical memory.
+// Returns a pointer that the kernel can use.
+// Returns 0 if the memory cannot be allocated.
+char*
+kalloc(void)
+{
+  struct run *r;
+
+try_again:
+  if(kmem.use_lock)
+    acquire(&kmem.lock);
+  r = kmem.freelist;
+  if(!r){
+    if(evict() == 0){
+      return 0;
+    }
+	  goto try_again;
+  }
+  if(r)
+    kmem.freelist = r->next;
+  if(kmem.use_lock)
+    release(&kmem.lock);
+  // MYCODE
+  struct page *p = &pages[V2P((char*)r) / PGSIZE];
+  p->vaddr = (char*)r;
+  num_free_pages--;
+  return (char*)r;
+}
