@@ -8,6 +8,10 @@
 #include "traps.h"
 #include "spinlock.h"
 
+extern struct page pages[];
+extern pte_t* walkpgdir(pde_t *pgdir, const void *va, int alloc);
+extern char *swap_track;
+
 // Interrupt descriptor table (shared by all CPUs).
 struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
@@ -75,6 +79,35 @@ trap(struct trapframe *tf)
   case T_IRQ0 + IRQ_SPURIOUS:
     cprintf("cpu%d: spurious interrupt at %x:%x\n",
             cpuid(), tf->cs, tf->eip);
+    lapiceoi();
+    break;
+  case T_PGFLT:
+    uint fpaddr = PGROUNDDOWN(rcr2());
+    struct mmap_area *m;
+    int found = -1;
+    struct page *p = &pages[V2P(fpaddr) / PGSIZE];
+    if(p->pgdir == 0){
+      panic("Page fault: pgdir does not exist\n");
+    }
+    
+    // map page
+    char *mem;
+    pde_t *pgdir = p->pgdir;
+    pte_t *pte;
+    mem = kalloc();
+    if(mem == 0){
+      cprintf("out of memory\n");
+      panic("Page fault: cannot evict\n");
+    }
+    memset(mem, 0, PGSIZE);
+    if((pte = walkpgdir(pgdir, fpaddr, 0)) == 0){
+      kfree(mem);
+      panic("Page fault: page table does not exist\n");
+    }
+    int j = PTE_ADDR(*pte) / 8 % 8;
+    int i = (PTE_ADDR(*pte) / 8 - j) / 8;
+    swapread(V2P(mem), PTE_ADDR(*pte));
+    swap_track[i] &= ~(1 << j);
     lapiceoi();
     break;
 

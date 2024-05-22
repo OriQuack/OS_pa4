@@ -9,6 +9,8 @@
 #include "mmu.h"
 #include "spinlock.h"
 
+extern pte_t* walkpgdir(pde_t *pgdir, const void *va, int alloc);
+
 void freerange(void *vstart, void *vend);
 extern char end[]; // first address after kernel loaded from ELF file
                    // defined by the kernel linker script in kernel.ld
@@ -25,6 +27,7 @@ struct {
 
 struct page pages[PHYSTOP/PGSIZE];
 struct page *page_lru_head;
+char *swap_track;
 int num_free_pages;
 int num_lru_pages;
 
@@ -36,6 +39,7 @@ int num_lru_pages;
 void
 kinit1(void *vstart, void *vend)
 {
+  num_free_pages = 0;
   initlock(&kmem.lock, "kmem");
   kmem.use_lock = 0;
   freerange(vstart, vend);
@@ -79,6 +83,10 @@ kfree(char *v)
   kmem.freelist = r;
   if(kmem.use_lock)
     release(&kmem.lock);
+  // MYCODE
+  struct page *p = &pages[V2P(v) / PGSIZE];
+  p->vaddr = 0;
+  num_free_pages++;
 }
 
 // Allocate one 4096-byte page of physical memory.
@@ -93,8 +101,12 @@ try_again:
   if(kmem.use_lock)
     acquire(&kmem.lock);
   r = kmem.freelist;
- if(!r && reclaim())
+  if(!r){
+    if(evict() == 0){
+      return 0;
+    }
 	  goto try_again;
+  }
   if(r)
     kmem.freelist = r->next;
   if(kmem.use_lock)
@@ -110,12 +122,65 @@ try_again:
 void pages_init() { 
   char* mem;
   if((mem = kalloc()) == 0)
-    panic("lru_list_init no memory");
+    panic("pages_init no memory");
   memset(mem, 0, PGSIZE);
   for(int i = 0; i < PHYSTOP / PGSIZE; i++){
     pages[i] = *(struct page*)(mem + sizeof(struct page) * i);
+    pages[i].next = 0;
+    pages[i].pgdir = 0;
+    pages[i].prev = 0;
+    pages[i].vaddr = 0;
   }
   page_lru_head->next = mem;
-  num_free_pages = PHYSTOP / PGSIZE;
   num_lru_pages = 0;
+  if((mem = kalloc()) == 0)
+    panic("pages_init no memory");
+  memset(mem, 0, PGSIZE);
+  swap_track = mem;
 }
+
+int evict(){
+  if(num_lru_pages == 0){
+    cprintf("Out of memory");
+    return 0;
+  }
+  while(1){
+    if(page_lru_head->pgdir == 0){
+      cprintf("smt wrong");
+      page_lru_head = page_lru_head->next;
+      continue;
+    }
+    pde_t *pgdir = page_lru_head->pgdir;
+    char* va = page_lru_head->vaddr;
+    pte_t *pte;
+    if((pte = walkpgdir(pgdir, va, 0)) == 0){
+      cprintf("pgtable does not exist");
+      return 0;
+    }
+    // Access bit 1
+    if(*pte | PTE_A == 1){
+      *pte = *pte & !PTE_A;
+      page_lru_head = page_lru_head->next;
+    }
+    // Access bit 0
+    else{
+      int offset = 0;
+      for(int i = 0; i < PGSIZE; i++){
+        char bitmap = swap_track[i];
+        for(int j = 0; j < 8; j++){
+          if((bitmap & (1 << j)) == 0){
+            offset = 8 * (i * 8 + j);
+            swap_track[i] |= (1 << j);
+            break;
+          }
+        }
+      }
+      swapwrite(V2P(va), offset);
+      *pte = pte_ADDR(*pte) ^ *pte | offset;
+      *pte = *pte & !PTE_P;
+      break;
+    }
+  }
+  return 1;
+}
+
