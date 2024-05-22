@@ -99,6 +99,23 @@ try_again:
     kmem.freelist = r->next;
   if(kmem.use_lock)
     release(&kmem.lock);
+  // MYCODE
+  struct page *p = &pages[V2P((char*)r) / PGSIZE];
+  p->vaddr = (char*)r;
+  num_free_pages--;
   return (char*)r;
 }
 
+// MYCODE
+void pages_init() { 
+  char* mem;
+  if((mem = kalloc()) == 0)
+    panic("lru_list_init no memory");
+  memset(mem, 0, PGSIZE);
+  for(int i = 0; i < PHYSTOP / PGSIZE; i++){
+    pages[i] = *(struct page*)(mem + sizeof(struct page) * i);
+  }
+  page_lru_head->next = mem;
+  num_free_pages = PHYSTOP / PGSIZE;
+  num_lru_pages = 0;
+}
