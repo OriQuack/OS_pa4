@@ -110,7 +110,7 @@ void pages_init() {
 }
 
 int evict(){
-  cprintf("In evict");
+  cprintf("In evict\n");
   if(num_lru_pages == 0){
     cprintf("Out of memory");
     return 0;
@@ -138,6 +138,7 @@ int evict(){
       int offset = 0;
       for(int i = 0; i < PGSIZE; i++){
         char bitmap = swap_track[i];
+        cprintf("%d", bitmap);
         for(int j = 0; j < 8; j++){
           if((bitmap & (1 << j)) == 0){
             offset = 8 * (i * 8 + j);
