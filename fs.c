@@ -691,6 +691,7 @@ void swapread(char* ptr, int blkno)
 
 void swapwrite(char* ptr, int blkno)
 {
+  cprintf("In swapwrite\n");
 	struct buf* bp;
 	int i;
 
