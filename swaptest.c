@@ -16,10 +16,8 @@ int main () {
 
   for(int i = 0; i < 100; i++){
     sbrk(4096 * 4096);
-    if(i % 10 == 0){
-      swapstat(&a, &b);
-      printf(1, "%d %d\n", a, b);
-    }
+    swapstat(&a, &b);
+    printf(1, "%d %d\n", a, b);
   }
 
   exit();
