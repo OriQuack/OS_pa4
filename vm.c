@@ -415,6 +415,7 @@ copyuvm(pde_t *pgdir, uint sz)
     if(!(*pte & PTE_P)){
       // copy in swap space
       // TODO;
+      panic("copyuvm: pte should be present")
     }
     pa = PTE_ADDR(*pte);
     flags = PTE_FLAGS(*pte);
