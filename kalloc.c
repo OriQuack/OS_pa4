@@ -128,7 +128,7 @@ int evict(){
       return 0;
     }
     // Access bit 1
-    if(*pte | PTE_A == 1){
+    if((*pte | PTE_A) == 1){
       *pte = *pte & !PTE_A;
       page_lru_head = page_lru_head->next;
     }
