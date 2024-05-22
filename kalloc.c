@@ -154,6 +154,7 @@ int evict(){
           break;
       }
       swapwrite((char *)V2P(va), offset);
+      cprintf("swapwrite done\n");
       *pte = (PTE_ADDR(*pte) ^ *pte) | offset;
       *pte = *pte & !PTE_P;
       break;
