@@ -110,7 +110,9 @@ void pages_init() {
 }
 
 int evict(){
-  cprintf("In evict\n");
+  cprintf("In evict: num_lru_pages: %ed\n", num_lru_pages);
+  cprintf("In evict: num_free_pages: %ed\n", num_free_pages);
+
   if(num_lru_pages == 0){
     cprintf("Out of memory");
     return 0;
@@ -131,27 +133,29 @@ int evict(){
     // Access bit 1
     if((*pte & PTE_A)){
       *pte = *pte & !PTE_A;
-      page_lru_head = page_lru_head->next;
     }
     // Access bit 0
     else{
-      int offset = 0;
+      int offset = -1;
       for(int i = 0; i < PGSIZE; i++){
         char bitmap = swap_track[i];
-        cprintf("%d\n", bitmap);
         for(int j = 0; j < 8; j++){
           if(!(bitmap & (1 << j))){
-            offset = 8 * (i * 8 + j);
+            offset = (i * 8 + j);
             swap_track[i] |= (1 << j);
             break;
           }
         }
+        if(offset != -1)
+          break;
       }
+      cprintf("offset: %d\n", offset);
       swapwrite((char *)V2P(va), offset);
       *pte = (PTE_ADDR(*pte) ^ *pte) | offset;
       *pte = *pte & !PTE_P;
       break;
     }
+    page_lru_head = page_lru_head->next;
   }
   return 1;
 }
