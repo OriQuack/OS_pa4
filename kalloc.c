@@ -149,7 +149,6 @@ int evict(){
         if(offset != -1)
           break;
       }
-      cprintf("offset: %d\n", offset);
       swapwrite((char *)V2P(va), offset);
       *pte = (PTE_ADDR(*pte) ^ *pte) | offset;
       *pte = *pte & !PTE_P;

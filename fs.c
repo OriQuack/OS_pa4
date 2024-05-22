@@ -703,6 +703,7 @@ void swapwrite(char* ptr, int blkno)
 		nr_sectors_write++;
 		bp = bread(0, SWAPBASE + BLKS_PER_PG * blkno + i);
 		memmove(bp->data, ptr + i * BSIZE, BSIZE);
+    cprintf("%d iter\n", i);
 		bwrite(bp);
 		brelse(bp);
 	}
