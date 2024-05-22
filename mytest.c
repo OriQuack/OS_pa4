@@ -11,3 +11,8 @@
 #include "proc.h"
 #include "syscall.h"
 
+
+int main(){
+  printf(1, "Hello");
+  exit();
+}
