@@ -9,7 +9,7 @@
 #include "spinlock.h"
 
 extern struct page pages[];
-extern pte_t* walkpgdir(pde_t *pgdir, const void *va, int alloc);
+extern pte_t* walkpgdir_(pde_t *pgdir, const void *va, int alloc);
 extern char *swap_track;
 
 // Interrupt descriptor table (shared by all CPUs).
@@ -98,7 +98,7 @@ trap(struct trapframe *tf)
       panic("Page fault: cannot evict\n");
     }
     memset(mem, 0, PGSIZE);
-    if((pte = walkpgdir(pgdir, (char*)fpaddr, 0)) == 0){
+    if((pte = walkpgdir_(pgdir, (char*)fpaddr, 0)) == 0){
       kfree(mem);
       panic("Page fault: page table does not exist\n");
     }

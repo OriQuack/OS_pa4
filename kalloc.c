@@ -9,7 +9,7 @@
 #include "mmu.h"
 #include "spinlock.h"
 
-extern pte_t* walkpgdir(pde_t *pgdir, const void *va, int alloc);
+extern pte_t* walkpgdir_(pde_t *pgdir, const void *va, int alloc);
 
 void freerange(void *vstart, void *vend);
 extern char end[]; // first address after kernel loaded from ELF file
@@ -123,7 +123,7 @@ int evict(){
     pde_t *pgdir = page_lru_head->pgdir;
     char* va = page_lru_head->vaddr;
     pte_t *pte;
-    if((pte = walkpgdir(pgdir, va, 0)) == 0){
+    if((pte = walkpgdir_(pgdir, va, 0)) == 0){
       cprintf("pgtable does not exist");
       return 0;
     }
