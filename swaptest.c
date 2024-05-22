@@ -21,7 +21,7 @@ int main () {
   swapstat(&a, &b);
   printf(1, "%d %d\n", a, b);
 
-  for(int i = 0; i < 1000; i++){
+  for(int i = 0; i < 100; i++){
     sbrk(4096 * 4096);
   }
 
