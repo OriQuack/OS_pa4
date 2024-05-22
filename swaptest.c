@@ -14,15 +14,15 @@ int main () {
   swapstat(&a, &b);
   printf(1, "%d %d\n", a, b);
 
-  for(int i = 0; i < 2000; i++){
-    sbrk(4096);
+  for(int i = 0; i < 1000; i++){
+    sbrk(4096 * 4096);
   }
 
   swapstat(&a, &b);
   printf(1, "%d %d\n", a, b);
 
-  for(int i = 0; i < 2000; i++){
-    sbrk(4096);
+  for(int i = 0; i < 1000; i++){
+    sbrk(4096 * 4096);
   }
 
   swapstat(&a, &b);
