@@ -691,7 +691,6 @@ void swapread(char* ptr, int blkno)
 
 void swapwrite(char* ptr, int blkno)
 {
-  cprintf("In swapwrite\n");
 	struct buf* bp;
 	int i;
 
@@ -702,6 +701,7 @@ void swapwrite(char* ptr, int blkno)
 
 	for ( i=0; i < BLKS_PER_PG; ++i ) {
 		nr_sectors_write++;
+    cprintf("In swapwrite\n");
 		bp = bread(0, SWAPBASE + BLKS_PER_PG * blkno + i);
 		memmove(bp->data, ptr + i * BSIZE, BSIZE);
     cprintf("%d iter\n", i);
