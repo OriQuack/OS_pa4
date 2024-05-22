@@ -138,7 +138,7 @@ int evict(){
       int offset = 0;
       for(int i = 0; i < PGSIZE; i++){
         char bitmap = swap_track[i];
-        cprintf("%d", bitmap);
+        cprintf("%d\n", bitmap);
         for(int j = 0; j < 8; j++){
           if((bitmap & (1 << j)) == 0){
             offset = 8 * (i * 8 + j);
