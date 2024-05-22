@@ -25,6 +25,9 @@ struct {
   struct run *freelist;
 } kmem;
 
+// MYCODE
+struct spinlock swap_lock;
+
 struct page pages[PHYSTOP/PGSIZE];
 struct page *page_lru_head;
 char *swap_track;
@@ -107,6 +110,7 @@ void pages_init() {
     panic("pages_init no memory");
   memset(mem, 0, PGSIZE);
   swap_track = mem;
+  initlock(&swap_lock, "swaplock");
 }
 
 int evict(){

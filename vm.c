@@ -231,6 +231,7 @@ inituvm(pde_t *pgdir, char *init, uint sz)
     p->prev = last;
     last->next = p;
   }
+  num_lru_pages++;
   memset(mem, 0, PGSIZE);
   mappages(pgdir, 0, PGSIZE, V2P(mem), PTE_W|PTE_U);
   memmove(mem, init, sz);
@@ -436,6 +437,7 @@ copyuvm(pde_t *pgdir, uint sz)
       p->prev = last;
       last->next = p;
     }
+    num_lru_pages++;
     // ~
     memmove(mem, (char*)P2V(pa), PGSIZE);
     if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0) {
