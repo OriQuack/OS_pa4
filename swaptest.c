@@ -15,7 +15,7 @@ int main () {
   printf(1, "%d %d\n", a, b);
 
   for(int i = 0; i < 100; i++){
-    sbrk(1024 * 1024);
+    sbrk(4 * 1024 * 1024);
     swapstat(&a, &b);
     printf(1, "%d %d\n", a, b);
   }
