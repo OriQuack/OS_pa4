@@ -11,6 +11,9 @@
 extern struct page pages[];
 extern pte_t* walkpgdir_(pde_t *pgdir, const void *va, int alloc);
 extern char *swap_track;
+extern struct page *page_lru_head;
+extern int num_free_pages;
+extern int num_lru_pages;
 
 // Interrupt descriptor table (shared by all CPUs).
 struct gatedesc idt[256];
@@ -83,7 +86,13 @@ trap(struct trapframe *tf)
     break;
   case T_PGFLT:
     uint fpaddr = PGROUNDDOWN(rcr2());
-    struct page *p = &pages[V2P(fpaddr) / PGSIZE];
+    struct page *p = page_lru_head;
+    for(int i = 0; i < num_lru_pages; i++){
+      if(p->vaddr == fpaddr){
+        break;
+      }
+      p = p->next;
+    }
     if(p->pgdir == 0){
       panic("Page fault: pgdir does not exist\n");
     }
