@@ -85,7 +85,7 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
   case T_PGFLT:
-    uint fpaddr = PGROUNDDOWN(rcr2());
+    char *fpaddr = (char*)PGROUNDDOWN(rcr2());
     struct page *p = page_lru_head;
     for(int i = 0; i < num_lru_pages; i++){
       if(p->vaddr == fpaddr){
@@ -107,7 +107,7 @@ trap(struct trapframe *tf)
       panic("Page fault: cannot evict\n");
     }
     memset(mem, 0, PGSIZE);
-    if((pte = walkpgdir_(pgdir, (char*)fpaddr, 0)) == 0){
+    if((pte = walkpgdir_(pgdir, fpaddr, 0)) == 0){
       kfree(mem);
       panic("Page fault: page table does not exist\n");
     }
