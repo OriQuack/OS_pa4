@@ -110,8 +110,8 @@ void pages_init() {
 }
 
 int evict(){
-  cprintf("In evict: num_lru_pages: %ed\n", num_lru_pages);
-  cprintf("In evict: num_free_pages: %ed\n", num_free_pages);
+  cprintf("In evict: num_lru_pages: %d\n", num_lru_pages);
+  cprintf("In evict: num_free_pages: %d\n", num_free_pages);
 
   if(num_lru_pages == 0){
     cprintf("Out of memory");
