@@ -85,8 +85,9 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
   case T_PGFLT:
-    cprintf("PGFAULT VA: %x PGALG: %x\n", rcr2(), PGROUNDDOWN(rcr2()));
-    char *fpaddr = (char*)PGROUNDDOWN(rcr2());
+    char* pgva = rcr2();
+    cprintf("PGFAULT VA: %x PA: %x\n", pgva, V2P(pgva));
+    char *fpaddr = (char*)PGROUNDDOWN((uint)pgva);
     struct page *p = 0;
     for(int i = 0; i < PHYSTOP / PGSIZE; i++){
       if((&pages[i])->vaddr == fpaddr){
