@@ -127,8 +127,8 @@ int evict(){
   //   cprintf("VA: %x dir: %x\n", p->vaddr, p->pgdir);
   //   p = p->next;
   // }
+  int asdf = 0;
   while(1){
-    int asdf = 0;
     if(page_lru_head->pgdir == 0){
       cprintf("smt wrong");
       page_lru_head = page_lru_head->next;
