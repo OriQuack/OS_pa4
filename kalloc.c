@@ -149,9 +149,10 @@ int evict(){
       cprintf("access bit 0\n");
       int offset = add_to_swapspace();
       swapwrite((char*)PTE_ADDR(*pte), offset);
-
+      
       kfree(va);
       remove_from_lru(va);
+      panic("remove from lru done\n");
       
       *pte = (PTE_ADDR(*pte) ^ *pte) | offset;
       *pte = *pte & !PTE_P;
@@ -159,7 +160,6 @@ int evict(){
     }
     page_lru_head = page_lru_head->next;
   }
-  cprintf("EVIC DONE\n\n\n");
   return 1;
 }
 // ~
