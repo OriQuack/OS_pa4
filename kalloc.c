@@ -149,6 +149,7 @@ int evict(){
       
       *pte = (*pte & PTE_FLAGS(*pte)) | (offset << 12);
       *pte = *pte & !PTE_P;
+      cprintf("Changed pte: %x\n", *pte);
       break;
     }
     page_lru_head = page_lru_head->next;
