@@ -148,7 +148,6 @@ int evict(){
     else{
       cprintf("access bit 0\n");
       int offset = add_to_swapspace();
-      cprintf("swapwrite start %d\n", offset);
       swapwrite((char*)PTE_ADDR(*pte), offset);
 
       kfree(va);
@@ -160,6 +159,7 @@ int evict(){
     }
     page_lru_head = page_lru_head->next;
   }
+  cprintf("EVIC DONE\n\n\n");
   return 1;
 }
 // ~
