@@ -83,6 +83,7 @@ kfree(char *v)
 
   // Fill with junk to catch dangling refs.
   memset(v, 1, PGSIZE);
+  cprintf("mem");
 
   if(kmem.use_lock)
     acquire(&kmem.lock);
@@ -149,7 +150,6 @@ int evict(){
       int offset = add_to_swapspace();
       swapwrite((char*)PTE_ADDR(*pte), offset);
       
-      panic("remove from lru done\n");
       kfree(va);
       remove_from_lru(va);
       
