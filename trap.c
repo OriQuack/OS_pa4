@@ -117,6 +117,7 @@ trap(struct trapframe *tf)
     swapread(mem, PTE_ADDR(*pte));
     swap_track[i] &= ~(1 << j);
     lapiceoi();
+    cprintf("PGFAULT DONE\n");
     break;
 
   //PAGEBREAK: 13
