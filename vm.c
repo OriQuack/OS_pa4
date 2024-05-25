@@ -13,6 +13,11 @@ extern int num_free_pages;
 extern int num_lru_pages;
 extern char* swap_track;
 
+void remove_from_lru(char* mem);
+void add_to_lru(char *mem, pde_t *pgdir);
+void remove_from_swapspace(pte_t *pte);
+int add_to_swapspace();
+
 extern char data[];  // defined by kernel.ld
 pde_t *kpgdir;  // for use in scheduler()
 
@@ -240,21 +245,7 @@ inituvm(pde_t *pgdir, char *init, uint sz)
   if(sz >= PGSIZE)
     panic("inituvm: more than a page");
   mem = kalloc();
-  struct page *p = &pages[V2P(mem) / PGSIZE];
-  if(page_lru_head == 0){
-    p->pgdir = pgdir;
-    p->next = p->prev = p;
-    page_lru_head = p;
-  }
-  else{
-    struct page *last = page_lru_head->prev;
-    p->pgdir = pgdir;
-    p->next = page_lru_head;
-    page_lru_head->prev = p;
-    p->prev = last;
-    last->next = p;
-  }
-  num_lru_pages++;
+  add_to_lru(mem, pgdir);
   memset(mem, 0, PGSIZE);
   mappages(pgdir, 0, PGSIZE, V2P(mem), PTE_W|PTE_U);
   memmove(mem, init, sz);
@@ -305,37 +296,13 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       deallocuvm(pgdir, newsz, oldsz);
       return 0;
     }
-    // MYCODE
-    struct page *p = &pages[V2P(mem) / PGSIZE];
-    if(num_lru_pages == 0){
-      p->pgdir = pgdir;
-      p->next = p->prev = p;
-      page_lru_head = p;
-    }
-    else{
-      struct page *last = page_lru_head->prev;
-      p->pgdir = pgdir;
-      p->next = page_lru_head;
-      page_lru_head->prev = p;
-      p->prev = last;
-      last->next = p;
-    }
-    num_lru_pages++;
-    // ~
+    add_to_lru(mem, pgdir);
     memset(mem, 0, PGSIZE);
     if(mappages(pgdir, (char*)a, PGSIZE, V2P(mem), PTE_W|PTE_U) < 0){
       cprintf("allocuvm out of memory (2)\n");
       deallocuvm(pgdir, newsz, oldsz);
       kfree(mem);
-      // MYCODE
-      p->prev->next = p->next;
-      p->next->prev = p->prev;
-      p->pgdir = 0;
-      num_lru_pages--;
-      if(num_lru_pages == 0){
-        page_lru_head = 0;
-      }
-      // ~
+      remove_from_lru(mem);
       return 0;
     }
   }
@@ -362,10 +329,7 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       a = PGADDR(PDX(a) + 1, 0, 0) - PGSIZE;
     // MYCODE: remove from swap space
     else if((*pte & PTE_P) == 0){
-      int j = PTE_ADDR(*pte) / 8 % 8;
-      int i = (PTE_ADDR(*pte) / 8 - j) / 8;
-      swap_track[i] &= ~(1 << j);
-      *pte = 0;
+      remove_from_swapspace(pte);
     }
     else if((*pte & PTE_P) != 0){
       pa = PTE_ADDR(*pte);
@@ -373,16 +337,7 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
         panic("kfree");
       char *v = P2V(pa);
       kfree(v);
-      // MYCODE
-      struct page *p = &pages[V2P(v) / PGSIZE];    
-      p->prev->next = p->next;
-      p->next->prev = p->prev;
-      p->pgdir = 0;
-      num_lru_pages--;
-      if(num_lru_pages == 0){
-        page_lru_head = 0;
-      }
-      // ~
+      remove_from_lru(v);
       *pte = 0;
     }
   }
@@ -445,19 +400,7 @@ copyuvm(pde_t *pgdir, uint sz)
       if((m = kalloc()) == 0)
         goto bad;
       swapread((char*)V2P(m), offset);
-
-      for(int i = 0; i < PGSIZE; i++){
-        char bitmap = swap_track[i];
-        for(int j = 0; j < 8; j++){
-          if(!(bitmap & (1 << j))){
-            offset = (i * 8 + j);
-            swap_track[i] |= (1 << j);
-            break;
-          }
-        }
-        if(offset != -1)
-          break;
-      }
+      offset = locate_blkno();
       swapwrite((char *)V2P(m), offset);
       kfree(m);
 
@@ -473,35 +416,12 @@ copyuvm(pde_t *pgdir, uint sz)
     if((mem = kalloc()) == 0)
       goto bad;
     // MYCODE
-    struct page *p = &pages[V2P(mem) / PGSIZE];
-    if(page_lru_head == 0){
-      p->pgdir = pgdir;
-      p->next = p->prev = p;
-      page_lru_head = p;
-    }
-    else{
-      struct page *last = page_lru_head->prev;
-      p->pgdir = pgdir;
-      p->next = page_lru_head;
-      page_lru_head->prev = p;
-      p->prev = last;
-      last->next = p;
-    }
-    num_lru_pages++;
+      add_to_lru(mem, pgdir);
     // ~
     memmove(mem, (char*)P2V(pa), PGSIZE);
     if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0) {
       kfree(mem);
-      // MYCODE
-      struct page *p = &pages[V2P(mem) / PGSIZE];    
-      p->prev->next = p->next;
-      p->next->prev = p->prev;
-      p->pgdir = 0;
-      num_lru_pages--;
-      if(num_lru_pages == 0){
-        page_lru_head = 0;
-      }
-      // ~
+      remove_from_lru(mem);
       goto bad;
     }
   }
@@ -559,3 +479,56 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
 // Blank page.
 //PAGEBREAK!
 // Blank page.
+
+void remove_from_lru(char* mem){
+  struct page *p = &pages[V2P(mem) / PGSIZE];    
+  p->prev->next = p->next;
+  p->next->prev = p->prev;
+  p->pgdir = 0;
+  num_lru_pages--;
+  if(num_lru_pages == 0){
+    page_lru_head = 0;
+  }
+}
+
+void add_to_lru(char *mem, pde_t *pgdir){
+  struct page *p = &pages[V2P(mem) / PGSIZE];
+  if(page_lru_head == 0){
+    p->pgdir = pgdir;
+    p->next = p->prev = p;
+    page_lru_head = p;
+  }
+  else{
+    struct page *last = page_lru_head->prev;
+    p->pgdir = pgdir;
+    p->next = page_lru_head;
+    page_lru_head->prev = p;
+    p->prev = last;
+    last->next = p;
+  }
+  num_lru_pages++;
+}
+
+void remove_from_swapspace(pte_t *pte){
+  int j = PTE_ADDR(*pte) / 8 % 8;
+  int i = (PTE_ADDR(*pte) / 8 - j) / 8;
+  swap_track[i] &= ~(1 << j);
+  *pte = 0;
+}
+
+int add_to_swapspace() {
+  int offset = -1;
+  for(int i = 0; i < PGSIZE; i++){
+  char bitmap = swap_track[i];
+  for(int j = 0; j < 8; j++){
+    if(!(bitmap & (1 << j))){
+      offset = (i * 8 + j);
+      swap_track[i] |= (1 << j);
+      break;
+    }
+  }
+  if(offset != -1)
+    break;
+  }
+  return offset;
+}

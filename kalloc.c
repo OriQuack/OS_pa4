@@ -11,6 +11,10 @@
 
 
 extern pte_t* walkpgdir_(pde_t *pgdir, const void *va, int alloc);
+extern void remove_from_lru(char* mem);
+extern void add_to_lru(char *mem, pde_t *pgdir);
+extern void remove_from_swapspace(pte_t *pte);
+extern int add_to_swapspace();
 
 void freerange(void *vstart, void *vend);
 extern char end[]; // first address after kernel loaded from ELF file
@@ -143,24 +147,14 @@ int evict(){
     // Access bit 0
     else{
       cprintf("access bit 0\n");
-      int offset = -1;
-      // locate empty space in swap space
-      for(int i = 0; i < PGSIZE; i++){
-        char bitmap = swap_track[i];
-        for(int j = 0; j < 8; j++){
-          if(!(bitmap & (1 << j))){
-            offset = (i * 8 + j);
-            swap_track[i] |= (1 << j);
-            break;
-          }
-        }
-        if(offset != -1)
-          break;
-      }
+      int offset = add_to_swapspace();
       cprintf("swapwrite start %d\n", offset);
       swapwrite((char *)V2P(va), offset);
       cprintf("swapwrite done\n");
-      panic("AHHHHH");
+
+      kfree(va);
+      remove_from_lru(va);
+      
       *pte = (PTE_ADDR(*pte) ^ *pte) | offset;
       *pte = *pte & !PTE_P;
       break;
@@ -188,7 +182,6 @@ try_again:
     if(evict() == 0){
       return 0;
     }
-    panic("AHHH");
 	  goto try_again;
   }
   if(r)
