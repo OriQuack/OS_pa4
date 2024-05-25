@@ -148,7 +148,7 @@ int evict(){
     // Access bit 0
     else{
       if(asdf == 0){
-        page_lru_head = page_lru_head->next->next->next->next;
+        page_lru_head = page_lru_head->next->next->next->next->next;
         asdf = 1;
         continue;
       }
