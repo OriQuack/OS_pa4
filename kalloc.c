@@ -188,6 +188,7 @@ try_again:
     if(evict() == 0){
       return 0;
     }
+    panic("AHHH");
 	  goto try_again;
   }
   if(r)
