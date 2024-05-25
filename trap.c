@@ -112,12 +112,11 @@ trap(struct trapframe *tf)
       panic("Page fault: cannot evict\n");
     }
     memset(mem, 0, PGSIZE);
-    cpirnf("VA recheck: %x\n", (char*)pgva);
     if((pte = walkpgdir_(pgdir, (char*)pgva, 0)) == 0){
       kfree(mem);
       panic("Page fault: page table does not exist\n");
     }
-    cprintf("PTE: %x\n", *pte);
+    cprintf("PTE: %x\n, PGDIR: %x\n", *pte, pgdir);
 
     int j = PTE_ADDR(*pte) / 8 % 8;
     int i = (PTE_ADDR(*pte) / 8 - j) / 8;
