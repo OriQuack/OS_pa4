@@ -87,17 +87,16 @@ trap(struct trapframe *tf)
   case T_PGFLT:
     cprintf("PGFAULT: %x\n", rcr2());
     char *fpaddr = (char*)PGROUNDDOWN(rcr2());
-    struct page *p = page_lru_head;
-    for(int i = 0; i < num_lru_pages; i++){
-      if(p->vaddr == fpaddr){
+    struct page *p = 0;
+    for(int i = 0; i < PHYSTOP / PGSIZE; i++){
+      if((&pages[i])->vaddr == fpaddr){
+        p = &pages[i];
         break;
       }
-      p = p->next;
     }
     if(p->pgdir == 0){
       panic("Page fault: pgdir does not exist\n");
     }
-
     
     // map page
     char *mem;

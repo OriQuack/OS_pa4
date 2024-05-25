@@ -182,6 +182,8 @@ try_again:
   if(kmem.use_lock)
     release(&kmem.lock);
   // MYCODE
+  struct page *p = &pages[V2P((char*)r) / PGSIZE];
+  p->vaddr = (char*)r;
   num_free_pages--;
   return (char*)r;
 }
