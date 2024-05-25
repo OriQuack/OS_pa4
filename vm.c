@@ -400,7 +400,7 @@ copyuvm(pde_t *pgdir, uint sz)
       if((m = kalloc()) == 0)
         goto bad;
       swapread((char*)V2P(m), offset);
-      offset = locate_blkno();
+      offset = add_to_swapspace();
       swapwrite((char *)V2P(m), offset);
       kfree(m);
 
