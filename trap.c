@@ -103,6 +103,7 @@ trap(struct trapframe *tf)
     pde_t *pgdir = p->pgdir;
     pte_t *pte;
     mem = kalloc();
+    cprintf("kalloc done\n");
     if(mem == 0){
       cprintf("out of memory\n");
       panic("Page fault: cannot evict\n");
