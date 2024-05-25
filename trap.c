@@ -85,7 +85,7 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
   case T_PGFLT:
-    cprintf("PGFAULT: %x\n", rcr2());
+    cprintf("PGFAULT VA: %x\n", rcr2());
     char *fpaddr = (char*)PGROUNDDOWN(rcr2());
     struct page *p = 0;
     for(int i = 0; i < PHYSTOP / PGSIZE; i++){
@@ -93,6 +93,9 @@ trap(struct trapframe *tf)
         p = &pages[i];
         break;
       }
+    }
+    if(p == 0) {
+      panic("Page fault: page does not exist");
     }
     if(p->pgdir == 0){
       panic("Page fault: pgdir does not exist\n");
