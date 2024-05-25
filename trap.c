@@ -113,11 +113,11 @@ trap(struct trapframe *tf)
     }
     memset(mem, 0, PGSIZE);
 
-    if((pte = walkpgdir_(pgdir, fpaddr, 0)) == 0){
+    if((pte = walkpgdir_(pgdir, pgva, 0)) == 0){
       kfree(mem);
       panic("Page fault: page table does not exist\n");
     }
-    cprintf("Faulted page VA: %x PA: %x\n", p->vaddr, PTE_ADDR(*pte));
+    cprintf("PTE: %x", *pte);
 
     int j = PTE_ADDR(*pte) / 8 % 8;
     int i = (PTE_ADDR(*pte) / 8 - j) / 8;
