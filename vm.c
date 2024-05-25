@@ -529,8 +529,8 @@ int add_to_swapspace() {
         break;
       }
     }
-  if(offset != -1)
-    break;
+    if(offset != -1)
+      break;
   }
   return offset;
 }
