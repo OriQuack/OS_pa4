@@ -82,7 +82,6 @@ kfree(char *v)
     panic("kfree");
 
   // Fill with junk to catch dangling refs.
-  cprintf("mem");
   memset(v, 1, PGSIZE);
 
   if(kmem.use_lock)
@@ -149,6 +148,8 @@ int evict(){
       cprintf("access bit 0\n");
       int offset = add_to_swapspace();
       swapwrite((char*)PTE_ADDR(*pte), offset);
+
+      cprintf("VA: %x, PA: %x, ??: %x", va, PTE_ADDR(*pte), P2V(PTE_ADDR(*pte)));
       
       kfree(va);
       remove_from_lru(va);
@@ -188,8 +189,6 @@ try_again:
   if(kmem.use_lock)
     release(&kmem.lock);
   // MYCODE
-  struct page *p = &pages[V2P((char*)r) / PGSIZE];
-  p->vaddr = (char*)r;
   num_free_pages--;
   return (char*)r;
 }
