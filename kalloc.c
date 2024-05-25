@@ -150,7 +150,6 @@ int evict(){
       cprintf("VA: %x PTE ADDR: %x\n", va, PTE_ADDR(*pte));
 
       swapwrite(va, offset);
-
       kfree(va);
       remove_from_lru(va);
       
@@ -182,7 +181,7 @@ try_again:
     if(evict() == 0){
       return 0;
     }
-    panic("Done evict\n");
+    cprintf("Done evict");
 	  goto try_again;
   }
   if(r)
