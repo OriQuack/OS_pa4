@@ -152,7 +152,7 @@ int evict(){
       kfree(va);
       remove_from_lru(va);
       
-      *pte = (*pte & PTE_FLAGS(*pte)) | (offset << 12);
+      // *pte = (*pte & PTE_FLAGS(*pte)) | (offset << 12);
       *pte = *pte & !PTE_P;
       cprintf("Changed pte: %x\n", *pte);
       break;
