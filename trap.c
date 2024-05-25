@@ -114,6 +114,7 @@ trap(struct trapframe *tf)
     }
     int j = PTE_ADDR(*pte) / 8 % 8;
     int i = (PTE_ADDR(*pte) / 8 - j) / 8;
+    cprintf("offset: %d", (PTE_ADDR(*pte) >> 12));
     swapread(mem, (PTE_ADDR(*pte) >> 12));
     swap_track[i] &= ~(1 << j);
     lapiceoi();
