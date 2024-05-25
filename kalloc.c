@@ -149,7 +149,7 @@ int evict(){
       cprintf("access bit 0\n");
       int offset = add_to_swapspace();
       cprintf("swapwrite start %d\n", offset);
-      swapwrite((char *)V2P(va), offset);
+      swapwrite(PTE_ADDR(*pte), offset);
       cprintf("swapwrite done\n");
 
       kfree(va);
