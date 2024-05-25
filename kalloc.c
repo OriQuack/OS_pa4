@@ -141,7 +141,6 @@ int evict(){
     }
     // Access bit 1
     if((*pte & PTE_A)){
-      cprintf("access bit 1\n");
       *pte = *pte & !PTE_A;
     }
     // Access bit 0
