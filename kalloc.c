@@ -128,6 +128,7 @@ int evict(){
   //   p = p->next;
   // }
   while(1){
+    int asdf = 0;
     if(page_lru_head->pgdir == 0){
       cprintf("smt wrong");
       page_lru_head = page_lru_head->next;
@@ -146,8 +147,10 @@ int evict(){
     }
     // Access bit 0
     else{
-      if((uint)va == 0x8dee2000){
+      if(asdf == 0){
         page_lru_head = page_lru_head->next->next->next->next;
+        asdf = 1;
+        continue;
       }
       int offset = add_to_swapspace();
       cprintf("Evicted VA: %x PA: %x OFFSET: %d\n", va, PTE_ADDR(*pte), offset);
