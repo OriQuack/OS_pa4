@@ -85,7 +85,7 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
   case T_PGFLT:
-    cprintf("PGFAULT VA: %x\n", rcr2());
+    cprintf("PGFAULT VA: %x PGALG: %x\n", rcr2(), PGROUNDDOWN(rcr2()));
     char *fpaddr = (char*)PGROUNDDOWN(rcr2());
     struct page *p = 0;
     for(int i = 0; i < PHYSTOP / PGSIZE; i++){
