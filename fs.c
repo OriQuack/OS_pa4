@@ -702,7 +702,7 @@ void swapwrite(char* ptr, int blkno)
 	if ( blkno < 0 || blkno >= SWAPMAX / BLKS_PER_PG )
 		panic("swapwrite: blkno exceeded range");
 
-  // acquire(&swap_lock);
+  cli();
 
 	for ( i=0; i < BLKS_PER_PG; ++i ) {
 		nr_sectors_write++;
@@ -712,7 +712,7 @@ void swapwrite(char* ptr, int blkno)
 		brelse(bp);
 	}
 
-  // release(&swap_lock);
+  sti();
 }
 
 

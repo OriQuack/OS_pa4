@@ -109,6 +109,29 @@ mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
   return 0;
 }
 
+// MYCODE
+static int
+mapVMpages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
+{
+  char *a, *last;
+  pte_t *pte;
+
+  a = (char*)PGROUNDDOWN((uint)va);
+  last = (char*)PGROUNDDOWN(((uint)va) + size - 1);
+  for(;;){
+    if((pte = walkpgdir(pgdir, a, 1)) == 0)
+      return -1;
+    if(*pte & PTE_P)
+      panic("remap");
+    *pte = pa | perm;
+    if(a == last)
+      break;
+    a += PGSIZE;
+    pa += PGSIZE;
+  }
+  return 0;
+}
+
 // There is one page table per process, plus one that's used when
 // a CPU is not running any process (kpgdir). The kernel uses the
 // current process's page table during system calls and interrupts;
@@ -413,11 +436,38 @@ copyuvm(pde_t *pgdir, uint sz)
   for(i = 0; i < sz; i += PGSIZE){
     if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
       panic("copyuvm: pte should exist");
+
+    // MYCODE: copy in swap space
     if(!(*pte & PTE_P)){
-      // copy in swap space
-      // TODO;
-      panic("copyuvm: pte should be present");
+      int offset = PTE_ADDR(*pte);
+      int VMflags = PTE_FLAGS(*pte);
+      char* m;
+      if((m = kalloc()) == 0)
+        goto bad;
+      swap_read((char*)V2P(m), offset);
+
+      for(int i = 0; i < PGSIZE; i++){
+        char bitmap = swap_track[i];
+        for(int j = 0; j < 8; j++){
+          if(!(bitmap & (1 << j))){
+            offset = (i * 8 + j);
+            swap_track[i] |= (1 << j);
+            break;
+          }
+        }
+        if(offset != -1)
+          break;
+      }
+      swapwrite((char *)V2P(m), offset);
+      kfree(m);
+
+      if(mapVMpages(pgdir, (void*)i, PGSIZE, offset, VMflags) < 0){
+        goto bad;
+      }
+      continue;
     }
+    // ~
+
     pa = PTE_ADDR(*pte);
     flags = PTE_FLAGS(*pte);
     if((mem = kalloc()) == 0)
