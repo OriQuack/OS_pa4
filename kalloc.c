@@ -161,7 +161,10 @@ int evict(){
       *pte = *pte & !PTE_P;
       *pte = (*pte & PTE_FLAGS(*pte)) | (offset << 12);
       cprintf("Changed pte: %x\n", *pte);
-      // page_lru_head = page_lru_head->next;
+      // pte 안바뀜ㅅㅂ?
+      pte = walkpgdir_(pgdir, va, 0);
+      cprintf("PTE: %x\n", *pte);
+
       break;
     }
     page_lru_head = page_lru_head->next;
