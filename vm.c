@@ -403,7 +403,6 @@ copyuvm(pde_t *pgdir, uint sz)
       offset = add_to_swapspace();
       swapwrite((char *)V2P(m), offset);
       kfree(m);
-      remove_from_lru(m);
 
       if(mapVMpages(pgdir, (void*)i, PGSIZE, offset, VMflags) < 0){
         goto bad;
@@ -416,9 +415,7 @@ copyuvm(pde_t *pgdir, uint sz)
     flags = PTE_FLAGS(*pte);
     if((mem = kalloc()) == 0)
       goto bad;
-    // MYCODE
-      add_to_lru(mem, pgdir);
-    // ~
+    add_to_lru(mem, pgdir);
     memmove(mem, (char*)P2V(pa), PGSIZE);
     if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0) {
       kfree(mem);
