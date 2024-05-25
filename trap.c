@@ -85,7 +85,7 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
   case T_PGFLT:
-    cprintf("PGFAULT\n");
+    cprintf("PGFAULT: %x\n", rcr2());
     char *fpaddr = (char*)PGROUNDDOWN(rcr2());
     struct page *p = page_lru_head;
     for(int i = 0; i < num_lru_pages; i++){
