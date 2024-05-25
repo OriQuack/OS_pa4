@@ -150,7 +150,7 @@ int evict(){
       int offset = add_to_swapspace();
       cprintf("swapwrite start %d\n", offset);
       swapwrite((char*)PTE_ADDR(*pte), offset);
-      cprintf("swapwrite done\n");
+      panic("swapwrite done\n");
 
       kfree(va);
       remove_from_lru(va);
