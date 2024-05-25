@@ -185,6 +185,6 @@ try_again:
     release(&kmem.lock);
   // MYCODE
   num_free_pages--;
-  cprintf("kalloc done");
+  cprintf("kd\n");
   return (char*)r;
 }
