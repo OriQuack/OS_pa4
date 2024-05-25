@@ -116,7 +116,7 @@ trap(struct trapframe *tf)
       kfree(mem);
       panic("Page fault: page table does not exist\n");
     }
-    cprintf("PTE: %x\n, PGDIR: %x\n", *pte, pgdir);
+    cprintf("PTE: %x PGDIR: %x\n", *pte, pgdir);
 
     int j = PTE_ADDR(*pte) / 8 % 8;
     int i = (PTE_ADDR(*pte) / 8 - j) / 8;
