@@ -140,8 +140,8 @@ int evict(){
       return 0;
     }
 
-    cprintf("VA: %x, PA: %x, ??: %x", va, PTE_ADDR(*pte), P2V(PTE_ADDR(*pte)));
-    
+    cprintf("VA: %x, PA: %x, ??: %x\n", va, PTE_ADDR(*pte), P2V(PTE_ADDR(*pte)));
+
     // Access bit 1
     if((*pte & PTE_A)){
       *pte = *pte & !PTE_A;
