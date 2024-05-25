@@ -706,8 +706,8 @@ void swapwrite(char* ptr, int blkno)
 	for ( i=0; i < BLKS_PER_PG; ++i ) {
 		nr_sectors_write++;
 		bp = bread(0, SWAPBASE + BLKS_PER_PG * blkno + i);
-    panic("bread done\n");
 		memmove(bp->data, ptr + i * BSIZE, BSIZE);
+    panic("memvmove done\n");
 		bwrite(bp);
     panic("cprintf done\n");
 		brelse(bp);
