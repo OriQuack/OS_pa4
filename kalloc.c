@@ -151,6 +151,8 @@ int evict(){
       swapwrite(va, offset);
       kfree(va);
       remove_from_lru(va);
+
+      cprintf("KK: %x\n", KERNBASE+PHYSTOP);
       
       *pte = (*pte & PTE_FLAGS(*pte)) | (offset << 12);
       *pte = *pte & !PTE_P;
