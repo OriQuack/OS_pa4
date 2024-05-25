@@ -139,6 +139,9 @@ int evict(){
       cprintf("pgtable does not exist");
       return 0;
     }
+
+    cprintf("VA: %x, PA: %x, ??: %x", va, PTE_ADDR(*pte), P2V(PTE_ADDR(*pte)));
+    
     // Access bit 1
     if((*pte & PTE_A)){
       *pte = *pte & !PTE_A;
@@ -149,7 +152,6 @@ int evict(){
       int offset = add_to_swapspace();
       swapwrite((char*)PTE_ADDR(*pte), offset);
 
-      cprintf("VA: %x, PA: %x, ??: %x", va, PTE_ADDR(*pte), P2V(PTE_ADDR(*pte)));
       
       kfree(va);
       remove_from_lru(va);
