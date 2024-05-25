@@ -83,7 +83,6 @@ kfree(char *v)
 
   // Fill with junk to catch dangling refs.
   memset(v, 1, PGSIZE);
-  cprintf("m");
 
   if(kmem.use_lock)
     acquire(&kmem.lock);
@@ -135,6 +134,7 @@ int evict(){
     }
     pde_t *pgdir = page_lru_head->pgdir;
     char* va = page_lru_head->vaddr;
+    cprintf("ADDR: %d\n", (int)va);
     pte_t *pte;
     if((pte = walkpgdir_(pgdir, va, 0)) == 0){
       cprintf("pgtable does not exist");
