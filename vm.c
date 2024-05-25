@@ -444,7 +444,7 @@ copyuvm(pde_t *pgdir, uint sz)
       char* m;
       if((m = kalloc()) == 0)
         goto bad;
-      swap_read((char*)V2P(m), offset);
+      swapread((char*)V2P(m), offset);
 
       for(int i = 0; i < PGSIZE; i++){
         char bitmap = swap_track[i];
