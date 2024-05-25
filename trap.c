@@ -112,7 +112,7 @@ trap(struct trapframe *tf)
       panic("Page fault: cannot evict\n");
     }
     memset(mem, 0, PGSIZE);
-
+    cpirnf("VA recheck: %x\n", (char*)pgva);
     if((pte = walkpgdir_(pgdir, (char*)pgva, 0)) == 0){
       kfree(mem);
       panic("Page fault: page table does not exist\n");

@@ -162,8 +162,6 @@ int evict(){
       *pte = (*pte & PTE_FLAGS(*pte)) | (offset << 12);
       cprintf("Changed pte: %x\n", *pte);
       // pte 안바뀜ㅅㅂ?
-      pte = walkpgdir_(pgdir, va, 0);
-      cprintf("PTE: %x\n", *pte);
 
       break;
     }
