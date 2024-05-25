@@ -138,10 +138,12 @@ int evict(){
     // Access bit 1
     if((*pte & PTE_A)){
       *pte = *pte & !PTE_A;
+      cprintf("clock-accessed\n");
     }
     // Access bit 0
     else{
       int offset = -1;
+      // locate empty space in swap space
       for(int i = 0; i < PGSIZE; i++){
         char bitmap = swap_track[i];
         for(int j = 0; j < 8; j++){
@@ -154,9 +156,7 @@ int evict(){
         if(offset != -1)
           break;
       }
-      // pushcli();
       swapwrite((char *)V2P(va), offset);
-      // popcli();
       cprintf("swapwrite done\n");
       *pte = (PTE_ADDR(*pte) ^ *pte) | offset;
       *pte = *pte & !PTE_P;
