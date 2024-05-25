@@ -113,7 +113,7 @@ trap(struct trapframe *tf)
     }
     int j = PTE_ADDR(*pte) / 8 % 8;
     int i = (PTE_ADDR(*pte) / 8 - j) / 8;
-    swapread((char*)V2P(mem), PTE_ADDR(*pte));
+    swapread(mem, PTE_ADDR(*pte));
     swap_track[i] &= ~(1 << j);
     lapiceoi();
     break;

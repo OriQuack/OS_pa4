@@ -399,9 +399,9 @@ copyuvm(pde_t *pgdir, uint sz)
       char* m;
       if((m = kalloc()) == 0)
         goto bad;
-      swapread((char*)V2P(m), offset);
+      swapread(m, offset);
       offset = add_to_swapspace();
-      swapwrite((char *)V2P(m), offset);
+      swapwrite(m, offset);
       kfree(m);
 
       if(mapVMpages(pgdir, (void*)i, PGSIZE, offset, VMflags) < 0){

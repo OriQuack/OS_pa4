@@ -119,9 +119,7 @@ void pages_init() {
 }
 
 int evict(){
-  cprintf("In evict: num_lru_pages: %d\n", num_lru_pages);
-  cprintf("In evict: num_free_pages: %d\n", num_free_pages);
-
+  cprintf("In EVICT\n");
   if(num_lru_pages == 0){
     cprintf("Out of memory");
     return 0;
@@ -145,7 +143,6 @@ int evict(){
     }
     // Access bit 0
     else{
-      cprintf("access bit 0\n");
       int offset = add_to_swapspace();
       cprintf("VA: %x PTE ADDR: %x\n", va, PTE_ADDR(*pte));
 
@@ -181,7 +178,7 @@ try_again:
     if(evict() == 0){
       return 0;
     }
-    cprintf("Done evict");
+    cprintf("Done evict: %d %d\n", num_lru_pages, num_free_pages);
 	  goto try_again;
   }
   if(r)
