@@ -97,6 +97,7 @@ trap(struct trapframe *tf)
     if(p->pgdir == 0){
       panic("Page fault: pgdir does not exist\n");
     }
+
     
     // map page
     char *mem;
@@ -112,9 +113,11 @@ trap(struct trapframe *tf)
       kfree(mem);
       panic("Page fault: page table does not exist\n");
     }
+    cprintf("Faulted page VA: %x PTE: %x\n", p->vaddr, PTE_ADDR(*pte));
+    
     int j = PTE_ADDR(*pte) / 8 % 8;
     int i = (PTE_ADDR(*pte) / 8 - j) / 8;
-    cprintf("offset: %d", (PTE_ADDR(*pte) >> 12));
+    cprintf("offset: %d\n", (PTE_ADDR(*pte) >> 12));
     swapread(mem, (PTE_ADDR(*pte) >> 12));
     swap_track[i] &= ~(1 << j);
     lapiceoi();
