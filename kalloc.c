@@ -146,13 +146,14 @@ int evict(){
     }
     // Access bit 0
     else{
+      if((uint)va == 0x8dee2000){
+        page_lru_head = page_lru_head->next->next->next->next;
+      }
       int offset = add_to_swapspace();
       cprintf("Evicted VA: %x PA: %x OFFSET: %d\n", va, PTE_ADDR(*pte), offset);
       swapwrite(va, offset);
       kfree(va);
       remove_from_lru(va);
-
-      cprintf("KK: %x\n", KERNBASE+PHYSTOP);
       
       *pte = (*pte & PTE_FLAGS(*pte)) | (offset << 12);
       *pte = *pte & !PTE_P;
