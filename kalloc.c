@@ -136,12 +136,9 @@ int evict(){
     char* va = page_lru_head->vaddr;
     pte_t *pte;
     if((pte = walkpgdir_(pgdir, va, 0)) == 0){
-      cprintf("pgtable does not exist");
+      panic("pgtable does not exist");
       return 0;
     }
-
-    cprintf("VA: %x, PA: %x, ??: %x\n", va, PTE_ADDR(*pte), P2V(PTE_ADDR(*pte)));
-
     // Access bit 1
     if((*pte & PTE_A)){
       *pte = *pte & !PTE_A;
@@ -152,7 +149,7 @@ int evict(){
       int offset = add_to_swapspace();
       swapwrite((char*)PTE_ADDR(*pte), offset);
 
-      
+      cprintf("PTE ADDR: %x", PTE_ADDR(*pte));
       kfree(va);
       remove_from_lru(va);
       
@@ -160,6 +157,7 @@ int evict(){
       *pte = *pte & !PTE_P;
       break;
     }
+
     page_lru_head = page_lru_head->next;
   }
   return 1;
