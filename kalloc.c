@@ -134,7 +134,7 @@ int evict(){
     }
     pde_t *pgdir = page_lru_head->pgdir;
     char* va = page_lru_head->vaddr;
-    cprintf("ADDR: %d\n", (int)va);
+    cprintf("ADDR: %x\n", (uint)va);
     pte_t *pte;
     if((pte = walkpgdir_(pgdir, va, 0)) == 0){
       cprintf("pgtable does not exist");
