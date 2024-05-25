@@ -92,8 +92,6 @@ kfree(char *v)
   if(kmem.use_lock)
     release(&kmem.lock);
   // MYCODE
-  struct page *p = &pages[V2P(v) / PGSIZE];
-  p->vaddr = 0;
   num_free_pages++;
 }
 
@@ -187,5 +185,6 @@ try_again:
     release(&kmem.lock);
   // MYCODE
   num_free_pages--;
+  cprintf("kalloc done");
   return (char*)r;
 }
