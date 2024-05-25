@@ -122,6 +122,11 @@ int evict(){
     cprintf("Out of memory");
     return 0;
   }
+  struct page *p = page_lru_head;
+  for(int i = 0; i < num_lru_pages; i++){
+    cprintf("VA: %x dir: %x\n", p->vaddr, p->pgdir);
+    p = p->next;
+  }
   while(1){
     if(page_lru_head->pgdir == 0){
       cprintf("smt wrong");

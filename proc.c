@@ -163,11 +163,9 @@ growproc(int n)
 
   sz = curproc->sz;
   if(n > 0){
-    cprintf("alloc\n");
     if((sz = allocuvm(curproc->pgdir, sz, sz + n)) == 0)
       return -1;
   } else if(n < 0){
-    cprintf("dealloc\n");
     if((sz = deallocuvm(curproc->pgdir, sz, sz + n)) == 0)
       return -1;
   }
