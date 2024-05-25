@@ -81,9 +81,9 @@ kfree(char *v)
   if((uint)v % PGSIZE || v < end || V2P(v) >= PHYSTOP)
     panic("kfree");
 
-  cprintf("memsetdone");
   // Fill with junk to catch dangling refs.
   memset(v, 1, PGSIZE);
+  cprintf("m\n");
 
   if(kmem.use_lock)
     acquire(&kmem.lock);
