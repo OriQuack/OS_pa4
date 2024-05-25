@@ -154,6 +154,7 @@ int evict(){
         if(offset != -1)
           break;
       }
+      cprintf("HERE");
       pushcli();
       swapwrite((char *)V2P(va), offset);
       popcli();
