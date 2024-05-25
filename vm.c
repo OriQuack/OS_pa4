@@ -403,6 +403,7 @@ copyuvm(pde_t *pgdir, uint sz)
       offset = add_to_swapspace();
       swapwrite((char *)V2P(m), offset);
       kfree(m);
+      remove_from_lru(m);
 
       if(mapVMpages(pgdir, (void*)i, PGSIZE, offset, VMflags) < 0){
         goto bad;
