@@ -184,7 +184,6 @@ try_again:
   if(kmem.use_lock)
     release(&kmem.lock);
   // MYCODE
-  if(num_free_pages == 1) cprintf("kd\n");
   num_free_pages--;
   return (char*)r;
 }
