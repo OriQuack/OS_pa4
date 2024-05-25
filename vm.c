@@ -497,12 +497,11 @@ void add_to_lru(char *mem, pde_t *pgdir){
     page_lru_head = p;
   }
   else{
-    struct page *last = page_lru_head->prev;
     p->pgdir = pgdir;
+    page_lru_head->prev->next = p;
     p->next = page_lru_head;
+    p->prev = page_lru_head->prev;
     page_lru_head->prev = p;
-    p->prev = last;
-    last->next = p;
   }
   p->vaddr = mem;
   num_lru_pages++;
