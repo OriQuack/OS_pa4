@@ -150,7 +150,6 @@ int evict(){
       int offset = add_to_swapspace();
       swapwrite((char*)PTE_ADDR(*pte), offset);
       
-      panic("remove from lru done\n");
       kfree(va);
       panic("remove from lru done\n");
       remove_from_lru(va);
