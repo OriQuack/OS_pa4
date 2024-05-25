@@ -181,7 +181,7 @@ try_again:
     if(evict() == 0){
       return 0;
     }
-    cprintf("Done evict\n");
+    panic("Done evict\n");
 	  goto try_again;
   }
   if(r)
