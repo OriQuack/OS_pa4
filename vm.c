@@ -504,6 +504,7 @@ void add_to_lru(char *mem, pde_t *pgdir){
     p->prev = last;
     last->next = p;
   }
+  p->vaddr = mem;
   num_lru_pages++;
 }
 
