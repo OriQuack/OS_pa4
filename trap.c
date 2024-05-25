@@ -113,7 +113,7 @@ trap(struct trapframe *tf)
     }
     memset(mem, 0, PGSIZE);
 
-    if((pte = walkpgdir_(pgdir, pgva, 0)) == 0){
+    if((pte = walkpgdir_(pgdir, (char*)pgva, 0)) == 0){
       kfree(mem);
       panic("Page fault: page table does not exist\n");
     }
