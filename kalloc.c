@@ -137,11 +137,12 @@ int evict(){
     }
     // Access bit 1
     if((*pte & PTE_A)){
+      cprintf("access bit 1\n");
       *pte = *pte & !PTE_A;
-      cprintf("clock-accessed\n");
     }
     // Access bit 0
     else{
+      cprintf("access bit 0\n");
       int offset = -1;
       // locate empty space in swap space
       for(int i = 0; i < PGSIZE; i++){
@@ -156,6 +157,7 @@ int evict(){
         if(offset != -1)
           break;
       }
+      cprintf("swapwrite start %d\n", offset);
       swapwrite((char *)V2P(va), offset);
       cprintf("swapwrite done\n");
       *pte = (PTE_ADDR(*pte) ^ *pte) | offset;
