@@ -149,7 +149,7 @@ int evict(){
       int offset = add_to_swapspace();
       swapwrite((char*)PTE_ADDR(*pte), offset);
 
-      cprintf("PTE ADDR: %x", PTE_ADDR(*pte));
+      cprintf("VA: %x PTE ADDR: %x\n", va, PTE_ADDR(*pte));
       kfree(va);
       remove_from_lru(va);
       

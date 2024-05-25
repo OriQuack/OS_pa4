@@ -483,9 +483,13 @@ void remove_from_lru(char* mem){
   p->prev->next = p->next;
   p->next->prev = p->prev;
   p->pgdir = 0;
+  p->vaddr = 0;
   num_lru_pages--;
   if(num_lru_pages == 0){
     page_lru_head = 0;
+  }
+  else if(page_lru_head == p){
+    page_lru_head = page_lru_head->next;
   }
 }
 
@@ -517,14 +521,14 @@ void remove_from_swapspace(pte_t *pte){
 int add_to_swapspace() {
   int offset = -1;
   for(int i = 0; i < PGSIZE; i++){
-  char bitmap = swap_track[i];
-  for(int j = 0; j < 8; j++){
-    if(!(bitmap & (1 << j))){
-      offset = (i * 8 + j);
-      swap_track[i] |= (1 << j);
-      break;
+    char bitmap = swap_track[i];
+    for(int j = 0; j < 8; j++){
+      if(!(bitmap & (1 << j))){
+        offset = (i * 8 + j);
+        swap_track[i] |= (1 << j);
+        break;
+      }
     }
-  }
   if(offset != -1)
     break;
   }
