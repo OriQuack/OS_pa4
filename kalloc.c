@@ -150,9 +150,10 @@ int evict(){
       int offset = add_to_swapspace();
       swapwrite((char*)PTE_ADDR(*pte), offset);
       
-      kfree(va);
-      remove_from_lru(va);
       panic("remove from lru done\n");
+      kfree(va);
+      panic("remove from lru done\n");
+      remove_from_lru(va);
       
       *pte = (PTE_ADDR(*pte) ^ *pte) | offset;
       *pte = *pte & !PTE_P;
