@@ -18,6 +18,7 @@ int main () {
     sbrk(4 * 1024 * 1024);
     swapstat(&a, &b);
     printf(1, "%d %d\n", a, b);
+    printf("iter: %d\n", i);
   }
 
   exit();
