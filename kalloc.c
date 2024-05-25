@@ -9,6 +9,8 @@
 #include "mmu.h"
 #include "spinlock.h"
 
+#include "x86.h"
+
 extern pte_t* walkpgdir_(pde_t *pgdir, const void *va, int alloc);
 
 void freerange(void *vstart, void *vend);
