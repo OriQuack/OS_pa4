@@ -181,6 +181,7 @@ try_again:
     acquire(&kmem.lock);
   r = kmem.freelist;
   if(!r){
+    release(&kmem.lock);
     if(evict() == 0){
       return 0;
     }
