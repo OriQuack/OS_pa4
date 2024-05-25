@@ -332,6 +332,7 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
     else if((*pte & PTE_P) == 0){
       remove_from_swapspace(pte);
     }
+    // remove from lru list
     else if((*pte & PTE_P) != 0){
       pa = PTE_ADDR(*pte);
       if(pa == 0)
@@ -339,7 +340,6 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       char *v = P2V(pa);
       kfree(v);
       remove_from_lru(v);
-      cprintf("WTF");
       *pte = 0;
     }
   }
@@ -422,7 +422,6 @@ copyuvm(pde_t *pgdir, uint sz)
     if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0) {
       kfree(mem);
       remove_from_lru(mem);
-      cprintf("CPOPY???");
       goto bad;
     }
   }

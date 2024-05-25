@@ -25,5 +25,8 @@ int main () {
     printf(1, "%d %d\n", a, b);
   }
 
+  printf(1, "PROGRAM DONE\n");
+
+
   exit();
 }
