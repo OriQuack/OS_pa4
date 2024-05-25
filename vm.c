@@ -489,6 +489,7 @@ void remove_from_lru(char* mem){
     page_lru_head = 0;
   }
   else if(page_lru_head == p){
+    cprintf("head moved");
     page_lru_head = page_lru_head->next;
   }
 }
