@@ -13,7 +13,7 @@ extern int num_free_pages;
 extern int num_lru_pages;
 extern char* swap_track;
 
-void remove_from_lru(char* mem);
+void remove_from_lru(char* mem, pde_t *pgadir);
 void add_to_lru(char *mem, pde_t *pgdir);
 void remove_from_swapspace(pte_t *pte);
 int add_to_swapspace();
@@ -247,7 +247,7 @@ inituvm(pde_t *pgdir, char *init, uint sz)
   mem = kalloc();
   memset(mem, 0, PGSIZE);
   mappages(pgdir, 0, PGSIZE, V2P(mem), PTE_W|PTE_U);
-  // add_to_lru(0, pgdir);
+  add_to_lru(0, pgdir);
   // pte_t *pte = walkpgdir(pgdir, 0, 0);
   // cprintf("INIT: va: %x, PTE: %x, pgdir: %x\n", 0, *pte, pgdir);
   memmove(mem, init, sz);
@@ -306,7 +306,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       kfree(mem);
       return 0;
     }
-    // add_to_lru((char*)a, pgdir);
+    add_to_lru((char*)a, pgdir);
     // pte_t *pte = walkpgdir(pgdir, (char*)a, 0);
     // cprintf("ALLOC: va: %x, PTE: %x, pgdir: %x\n", a, *pte, pgdir);
   }
@@ -334,6 +334,7 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
     // MYCODE: remove from swap space
     else if((*pte & PTE_P) == 0){
       remove_from_swapspace(pte);
+      *pte = 0;
     }
     // remove from lru list
     else if((*pte & PTE_P) != 0){
@@ -342,7 +343,7 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
         panic("kfree");
       char *v = P2V(pa);
       kfree(v);
-      remove_from_lru(v);
+      remove_from_lru(v, pgdir);
       *pte = 0;
     }
   }
@@ -399,6 +400,7 @@ copyuvm(pde_t *pgdir, uint sz)
 
     // MYCODE: copy in swap space
     if(!(*pte & PTE_P)){
+      cprintf("COPY SWAP\n");
       int offset = PTE_ADDR(*pte);
       int VMflags = PTE_FLAGS(*pte);
       char* m;
@@ -425,8 +427,8 @@ copyuvm(pde_t *pgdir, uint sz)
       kfree(mem);
       goto bad;
     }
-    // add_to_lru((char*)i, d);
-    // cprintf("COPY: va: %x, PTE: %x, pgdir: %x\n", (char*)i, *pte, d);
+    add_to_lru((char*)i, d);
+    // cprintf("COPY: va: %x, PTE: %x, pgdir: %x\n", i, *pte, d);
   }
   return d;
 
@@ -483,8 +485,9 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
 //PAGEBREAK!
 // Blank page.
 
-void remove_from_lru(char* mem){
-  struct page *p = &pages[V2P(mem) / PGSIZE];    
+void remove_from_lru(char* mem, pde_t *pgdir){
+  pte_t *pte = walkpgdir(pgdir, mem, 0);
+  struct page *p = &pages[PTE_ADDR(*pte) / PGSIZE];    
   p->prev->next = p->next;
   p->next->prev = p->prev;
   p->pgdir = 0;
@@ -499,7 +502,8 @@ void remove_from_lru(char* mem){
 }
 
 void add_to_lru(char *mem, pde_t *pgdir){
-  struct page *p = &pages[V2P(mem) / PGSIZE];
+  pte_t *pte = walkpgdir(pgdir, mem, 0);
+  struct page *p = &pages[PTE_ADDR(*pte) / PGSIZE];  
   if(page_lru_head == 0){
     p->pgdir = pgdir;
     p->next = p->prev = p;
@@ -520,7 +524,6 @@ void remove_from_swapspace(pte_t *pte){
   int j = PTE_ADDR(*pte) / 8 % 8;
   int i = (PTE_ADDR(*pte) / 8 - j) / 8;
   swap_track[i] &= ~(1 << j);
-  *pte = 0;
 }
 
 int add_to_swapspace() {

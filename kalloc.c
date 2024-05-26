@@ -11,7 +11,7 @@
 
 
 extern pte_t* walkpgdir_(pde_t *pgdir, const void *va, int alloc);
-extern void remove_from_lru(char* mem);
+extern void remove_from_lru(char* mem, pde_t *pgdir);
 extern void add_to_lru(char *mem, pde_t *pgdir);
 extern void remove_from_swapspace(pte_t *pte);
 extern int add_to_swapspace();
@@ -113,11 +113,11 @@ void pages_init() {
     panic("pages_init no memory");
   memset(mem, 0, PGSIZE);
   swap_track = mem;
-  initlock(&swap_lock, "swaplock");
+  // initlock(&swap_lock, "swaplock");
 }
 
 int evict(){
-  cprintf("In EVICT\n");
+  // cprintf("In EVICT\n");
   if(num_lru_pages == 0){
     cprintf("Out of memory");
     return 0;
@@ -127,13 +127,7 @@ int evict(){
   //   cprintf("VA: %x dir: %x\n", p->vaddr, p->pgdir);
   //   p = p->next;
   // }
-  int asdf = 0;
   while(1){
-    if(page_lru_head->pgdir == 0){
-      cprintf("smt wrong");
-      page_lru_head = page_lru_head->next;
-      continue;
-    }
     pde_t *pgdir = page_lru_head->pgdir;
     char* va = page_lru_head->vaddr;
     pte_t *pte;
@@ -141,33 +135,32 @@ int evict(){
       panic("pgtable does not exist");
       return 0;
     }
+    // recheck
     if(!(*pte & PTE_U)){
-      // cprintf("Evicted VA: %x PTE: %x PGDIR: %x\n", va, *pte, pgdir);
       page_lru_head = page_lru_head->next;
       continue;
     }
     // Access bit 1
     if((*pte & PTE_A)){
-      *pte = (*pte ^ PTE_A);
+      *pte &= ~PTE_A;
+      page_lru_head = page_lru_head->next;
+      continue;
     }
     // Access bit 0
     else{
-      if(asdf == 0){
-        // page_lru_head = page_lru_head->next->next->next->next->next;
-        asdf = 1;
-        continue;
-      }
       int offset = add_to_swapspace();
-      cprintf("Evicted VA: %x PTE: %x PGDIR: %x OFFSET: %d\n", va, *pte, pgdir, offset);
+      char* mem = va;
+      if(V2P(va) >= PHYSTOP) {
+        mem = P2V(PTE_ADDR(*pte));
+      }
+      // cprintf("Evicted VA: %x mem: %x PTE: %x PGDIR: %x OFFSET: %d\n", va, mem, *pte, pgdir, offset);
       swapwrite(va, offset);
-      kfree(va);
-      remove_from_lru(va);
+      kfree(mem);
+      remove_from_lru(va, pgdir);
       
-      *pte = *pte & !PTE_P;
+      *pte &= ~PTE_P;
       *pte = (*pte & PTE_FLAGS(*pte)) | (offset << 12);
-      cprintf("Changed pte: %x\n", *pte);
-      // TODO: pgdir 고려
-
+      // cprintf("Changed pte: %x\n", *pte);
       break;
     }
     page_lru_head = page_lru_head->next;
@@ -193,7 +186,6 @@ try_again:
     if(evict() == 0){
       return 0;
     }
-    cprintf("Done evict: %d %d\n", num_lru_pages, num_free_pages);
 	  goto try_again;
   }
   if(r)
@@ -201,8 +193,8 @@ try_again:
   if(kmem.use_lock)
     release(&kmem.lock);
   // MYCODE
-  struct page *p = &pages[V2P((char*)r) / PGSIZE];
-  p->vaddr = (char*)r;
+  // struct page *p = &pages[V2P((char*)r) / PGSIZE];
+  // p->vaddr = (char*)r;
   num_free_pages--;
   return (char*)r;
 }

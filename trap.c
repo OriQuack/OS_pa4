@@ -14,6 +14,10 @@ extern char *swap_track;
 extern struct page *page_lru_head;
 extern int num_free_pages;
 extern int num_lru_pages;
+extern void remove_from_lru(char* mem, pde_t *pgdir);
+extern void add_to_lru(char *mem, pde_t *pgdir);
+extern void remove_from_swapspace(pte_t *pte);
+extern int add_to_swapspace();
 
 // Interrupt descriptor table (shared by all CPUs).
 struct gatedesc idt[256];
@@ -86,45 +90,37 @@ trap(struct trapframe *tf)
     break;
   case T_PGFLT:
     uint pgva = rcr2();
-    cprintf("PGFAULT: VA: %x ", pgva);
+    // cprintf("PGFAULT VA: %x\n", pgva);
     char *fpaddr = (char*)PGROUNDDOWN(pgva);
-    struct page *p = 0;
-    for(int i = 0; i < PHYSTOP / PGSIZE; i++){
-      if((&pages[i])->vaddr == fpaddr && (&pages[i])->pgdir == myproc()->pgdir){
-        p = &pages[i];
-        break;
-      }
-    }
-    if(p == 0) {
-      panic("Page fault: page does not exist");
-    }
-    if(p->pgdir == 0){
-      panic("Page fault: pgdir does not exist\n");
+    pte_t *pte;
+    pde_t *pgdir = myproc()->pgdir;
+    if((pte = walkpgdir_(pgdir, fpaddr, 0)) == 0){
+      panic("Page fault: page table does not exist\n");
     }
     
     // map page
     char *mem;
-    pde_t *pgdir = p->pgdir;
-    pte_t *pte;
     mem = kalloc();
     if(mem == 0){
       cprintf("out of memory\n");
       panic("Page fault: cannot evict\n");
     }
     memset(mem, 0, PGSIZE);
-    if((pte = walkpgdir_(pgdir, (char*)pgva, 0)) == 0){
-      kfree(mem);
-      panic("Page fault: page table does not exist\n");
-    }
-    cprintf("PGFAULT: PTE: %x PGDIR: %x\n", *pte, pgdir);
+    // cprintf("PGFAULT PTE: %x PGDIR: %x OFFSET: %d\n", *pte, pgdir, (PTE_ADDR(*pte) >> 12));
 
-    int j = PTE_ADDR(*pte) / 8 % 8;
-    int i = (PTE_ADDR(*pte) / 8 - j) / 8;
-    cprintf("offset: %d\n", (PTE_ADDR(*pte) >> 12));
+    // swap read
     swapread(mem, (PTE_ADDR(*pte) >> 12));
-    swap_track[i] &= ~(1 << j);
+    remove_from_swapspace(pte);
+
+    // set pte
+    *pte = *pte | PTE_P;
+    *pte = (*pte & PTE_FLAGS(*pte)) | V2P(mem);
+
+    // add to lru
+    add_to_lru(fpaddr, pgdir);
+
     lapiceoi();
-    cprintf("PGFAULT DONE\n");
+    // cprintf("PGFAULT DONE\n");
     break;
 
   //PAGEBREAK: 13

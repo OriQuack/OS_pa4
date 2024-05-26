@@ -14,19 +14,29 @@ int main () {
 	int a, b;
   swapstat(&a, &b);
   printf(1, "%d %d\n", a, b);
+
+  char* mem = sbrk(4 * 1024 * 1024);
   
-  for(int i = 0; i < 55; i++){
+  for(int i = 0; i < 54; i++){
     sbrk(4 * 1024 * 1024);
   }
-  for(int i = 0; i < 190; i++){
+  for(int i = 0; i < 200; i++){
     printf(1, "iter: %d\n", i);
     sbrk(4 * 1024);
     swapstat(&a, &b);
     printf(1, "%d %d\n", a, b);
   }
 
+  mem[0] = 3;
+  swapstat(&a, &b);
+  printf(1, "%d %d\n", a, b);
+  mem[4096] = 4;
+  swapstat(&a, &b);
+  printf(1, "%d %d\n", a, b);
+  mem[4096 * 2] = 89;
+  swapstat(&a, &b);
+  printf(1, "%d %d\n", a, b);
+
   printf(1, "PROGRAM DONE\n");
-
-
   exit();
 }
