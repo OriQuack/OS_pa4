@@ -141,6 +141,7 @@ int evict(){
       panic("pgtable does not exist");
       return 0;
     }
+    cprintf("PTE: %x\n", *pte);
     if(!(*pte & PTE_U)){
       page_lru_head = page_lru_head->next;
       continue;
