@@ -386,6 +386,7 @@ clearpteu(pde_t *pgdir, char *uva)
 pde_t*
 copyuvm(pde_t *pgdir, uint sz)
 {
+  cprintf("CONPY");
   pde_t *d;
   pte_t *pte;
   uint pa, i, flags;
@@ -499,7 +500,6 @@ void remove_from_lru(char* mem){
 }
 
 void add_to_lru(char *mem, pde_t *pgdir){
-  cprintf("ADD");
   struct page *p = &pages[V2P(mem) / PGSIZE];
   if(page_lru_head == 0){
     p->pgdir = pgdir;
