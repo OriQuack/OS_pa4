@@ -17,7 +17,7 @@ int main () {
 
   char* mem = sbrk(4 * 1024 * 1024);
   
-  for(int i = 0; i < 55; i++){
+  for(int i = 0; i < 54; i++){
     sbrk(4 * 1024 * 1024);
   }
   for(int i = 0; i < 200; i++){
