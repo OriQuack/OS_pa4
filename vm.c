@@ -248,8 +248,8 @@ inituvm(pde_t *pgdir, char *init, uint sz)
   memset(mem, 0, PGSIZE);
   mappages(pgdir, 0, PGSIZE, V2P(mem), PTE_W|PTE_U);
   add_to_lru(mem, pgdir);
-  pte_t *pte = walkpgdir(pgdir, mem, 0);
-  cprintf("INIT: va: %x, PTE: %x, pgdir: %x\n", mem, *pte, pgdir);
+  pte_t *pte = walkpgdir(pgdir, 0, 0);
+  cprintf("INIT: va: %x, PTE: %x, pgdir: %x\n", 0, *pte, pgdir);
   memmove(mem, init, sz);
 }
 
@@ -307,8 +307,8 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       return 0;
     }
     add_to_lru(mem, pgdir);
-    pte_t *pte = walkpgdir(pgdir, mem, 0);
-    cprintf("ALLOC: va: %x, PTE: %x, pgdir: %x\n", mem, *pte, pgdir);
+    pte_t *pte = walkpgdir(pgdir, a, 0);
+    cprintf("ALLOC: va: %x, PTE: %x, pgdir: %x\n", a, *pte, pgdir);
   }
   return newsz;
 }
@@ -399,6 +399,7 @@ copyuvm(pde_t *pgdir, uint sz)
 
     // MYCODE: copy in swap space
     if(!(*pte & PTE_P)){
+      cprintf("COPY SWAP\n");
       int offset = PTE_ADDR(*pte);
       int VMflags = PTE_FLAGS(*pte);
       char* m;
@@ -426,7 +427,7 @@ copyuvm(pde_t *pgdir, uint sz)
       goto bad;
     }
     add_to_lru(mem, pgdir);
-    cprintf("COPY: va: %x, PTE: %x, pgdir: %x\n", mem, *pte, pgdir);
+    cprintf("COPY: va: %x, PTE: %x, pgdir: %x\n", i, *pte, pgdir);
   }
   return d;
 
