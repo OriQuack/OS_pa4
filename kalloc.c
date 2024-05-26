@@ -147,7 +147,7 @@ int evict(){
     }
     // Access bit 1
     if((*pte & PTE_A)){
-      *pte = (*pte ^ PTE_A);
+      *pte &= ~PTE_A;
       page_lru_head = page_lru_head->next;
       continue;
     }
@@ -164,7 +164,7 @@ int evict(){
       kfree(mem);
       remove_from_lru(va, pgdir);
       
-      *pte = (*pte ^ PTE_P);
+      *pte &= ~PTE_P;
       *pte = (*pte & PTE_FLAGS(*pte)) | (offset << 12);
       cprintf("Changed pte: %x\n", *pte);
       break;
