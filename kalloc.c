@@ -11,7 +11,7 @@
 
 
 extern pte_t* walkpgdir_(pde_t *pgdir, const void *va, int alloc);
-extern void remove_from_lru(char* mem);
+extern void remove_from_lru(char* mem, pde_t *pgdir);
 extern void add_to_lru(char *mem, pde_t *pgdir);
 extern void remove_from_swapspace(pte_t *pte);
 extern int add_to_swapspace();
@@ -164,7 +164,7 @@ int evict(){
       cprintf("SWAPWRITE DONE\n");
       kfree(mem);
       cprintf("KFREE DONE\n");
-      remove_from_lru(va);
+      remove_from_lru(va, pgdir);
       
       *pte = *pte & !PTE_P;
       *pte = (*pte & PTE_FLAGS(*pte)) | (offset << 12);
