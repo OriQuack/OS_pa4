@@ -334,6 +334,7 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
     // MYCODE: remove from swap space
     else if((*pte & PTE_P) == 0){
       remove_from_swapspace(pte);
+      *pte = 0;
     }
     // remove from lru list
     else if((*pte & PTE_P) != 0){
@@ -523,7 +524,6 @@ void remove_from_swapspace(pte_t *pte){
   int j = PTE_ADDR(*pte) / 8 % 8;
   int i = (PTE_ADDR(*pte) / 8 - j) / 8;
   swap_track[i] &= ~(1 << j);
-  *pte = 0;
 }
 
 int add_to_swapspace() {
