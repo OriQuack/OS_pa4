@@ -141,24 +141,26 @@ int evict(){
       panic("pgtable does not exist");
       return 0;
     }
+    // recheck
     if(!(*pte & PTE_U)){
-      // cprintf("Evicted VA: %x PTE: %x PGDIR: %x\n", va, *pte, pgdir);
       page_lru_head = page_lru_head->next;
       continue;
     }
     // Access bit 1
     if((*pte & PTE_A)){
       *pte = (*pte ^ PTE_A);
+      page_lru_head = page_lru_head->next;
+      continue;
     }
     // Access bit 0
     else{
-      if(asdf == 0){
-        // page_lru_head = page_lru_head->next->next->next->next->next;
-        asdf = 1;
-        continue;
-      }
       int offset = add_to_swapspace();
-      cprintf("Evicted VA: %x PTE: %x PGDIR: %x OFFSET: %d\n", va, *pte, pgdir, offset);
+      char* mem = va;
+      if(V2P(va) >= PHYSTOP) {
+        mem = P2V(PTE_ADDR(*pte));
+      }
+      cprintf("Evicted VA: %x mem: %x PTE: %x PGDIR: %x OFFSET: %d\n", va, mem, *pte, pgdir, offset);
+      // va or pa??
       swapwrite(va, offset);
       kfree(va);
       remove_from_lru(va);
