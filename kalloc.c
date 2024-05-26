@@ -141,8 +141,8 @@ int evict(){
       panic("pgtable does not exist");
       return 0;
     }
-    cprintf("PTE: %x\n", *pte);
     if(!(*pte & PTE_U)){
+      cprintf("Evicted VA: %x PTE: %x PGDIR: %x\n", va, *pte, pgdir);
       page_lru_head = page_lru_head->next;
       continue;
     }
@@ -153,7 +153,7 @@ int evict(){
     // Access bit 0
     else{
       if(asdf == 0){
-        page_lru_head = page_lru_head->next->next->next->next->next;
+        // page_lru_head = page_lru_head->next->next->next->next->next;
         asdf = 1;
         continue;
       }
