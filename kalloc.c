@@ -117,7 +117,7 @@ void pages_init() {
 }
 
 int evict(){
-  cprintf("In EVICT\n");
+  // cprintf("In EVICT\n");
   if(num_lru_pages == 0){
     cprintf("Out of memory");
     return 0;
@@ -128,11 +128,6 @@ int evict(){
   //   p = p->next;
   // }
   while(1){
-    if(page_lru_head->pgdir == 0){
-      cprintf("smt wrong");
-      page_lru_head = page_lru_head->next;
-      continue;
-    }
     pde_t *pgdir = page_lru_head->pgdir;
     char* va = page_lru_head->vaddr;
     pte_t *pte;
@@ -158,15 +153,14 @@ int evict(){
       if(V2P(va) >= PHYSTOP) {
         mem = P2V(PTE_ADDR(*pte));
       }
-      cprintf("Evicted VA: %x mem: %x PTE: %x PGDIR: %x OFFSET: %d\n", va, mem, *pte, pgdir, offset);
-      // va or pa??
+      // cprintf("Evicted VA: %x mem: %x PTE: %x PGDIR: %x OFFSET: %d\n", va, mem, *pte, pgdir, offset);
       swapwrite(va, offset);
       kfree(mem);
       remove_from_lru(va, pgdir);
       
       *pte &= ~PTE_P;
       *pte = (*pte & PTE_FLAGS(*pte)) | (offset << 12);
-      cprintf("Changed pte: %x\n", *pte);
+      // cprintf("Changed pte: %x\n", *pte);
       break;
     }
     page_lru_head = page_lru_head->next;

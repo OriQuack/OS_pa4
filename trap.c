@@ -90,7 +90,7 @@ trap(struct trapframe *tf)
     break;
   case T_PGFLT:
     uint pgva = rcr2();
-    cprintf("PGFAULT VA: %x\n", pgva);
+    // cprintf("PGFAULT VA: %x\n", pgva);
     char *fpaddr = (char*)PGROUNDDOWN(pgva);
     pte_t *pte;
     pde_t *pgdir = myproc()->pgdir;
@@ -106,7 +106,7 @@ trap(struct trapframe *tf)
       panic("Page fault: cannot evict\n");
     }
     memset(mem, 0, PGSIZE);
-    cprintf("PGFAULT PTE: %x PGDIR: %x OFFSET: %d\n", *pte, pgdir, (PTE_ADDR(*pte) >> 12));
+    // cprintf("PGFAULT PTE: %x PGDIR: %x OFFSET: %d\n", *pte, pgdir, (PTE_ADDR(*pte) >> 12));
 
     // swap read
     swapread(mem, (PTE_ADDR(*pte) >> 12));
@@ -120,7 +120,7 @@ trap(struct trapframe *tf)
     add_to_lru(fpaddr, pgdir);
 
     lapiceoi();
-    cprintf("PGFAULT DONE\n");
+    // cprintf("PGFAULT DONE\n");
     break;
 
   //PAGEBREAK: 13
