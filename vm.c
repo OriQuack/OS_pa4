@@ -13,7 +13,7 @@ extern int num_free_pages;
 extern int num_lru_pages;
 extern char* swap_track;
 
-void remove_from_lru(char* mem);
+void remove_from_lru(char* mem, pde_t *pgadir);
 void add_to_lru(char *mem, pde_t *pgdir);
 void remove_from_swapspace(pte_t *pte);
 int add_to_swapspace();
@@ -342,7 +342,7 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
         panic("kfree");
       char *v = P2V(pa);
       kfree(v);
-      remove_from_lru(v);
+      remove_from_lru(v, pgdir);
       *pte = 0;
     }
   }
@@ -484,8 +484,9 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
 //PAGEBREAK!
 // Blank page.
 
-void remove_from_lru(char* mem){
-  struct page *p = &pages[V2P(mem) / PGSIZE];    
+void remove_from_lru(char* mem, pde_t *pgdir){
+  pte_t *pte = walkpgdir(pgdir, mem, 0);
+  struct page *p = &pages[PTE_ADDR(*pte) / PGSIZE];    
   p->prev->next = p->next;
   p->next->prev = p->prev;
   p->pgdir = 0;
@@ -500,7 +501,8 @@ void remove_from_lru(char* mem){
 }
 
 void add_to_lru(char *mem, pde_t *pgdir){
-  struct page *p = &pages[V2P(mem) / PGSIZE];
+  pte_t *pte = walkpgdir(pgdir, mem, 0);
+  struct page *p = &pages[PTE_ADDR(*pte) / PGSIZE];  
   if(page_lru_head == 0){
     p->pgdir = pgdir;
     p->next = p->prev = p;

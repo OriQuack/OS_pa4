@@ -113,7 +113,7 @@ void pages_init() {
     panic("pages_init no memory");
   memset(mem, 0, PGSIZE);
   swap_track = mem;
-  initlock(&swap_lock, "swaplock");
+  // initlock(&swap_lock, "swaplock");
 }
 
 int evict(){
@@ -201,8 +201,8 @@ try_again:
   if(kmem.use_lock)
     release(&kmem.lock);
   // MYCODE
-  struct page *p = &pages[V2P((char*)r) / PGSIZE];
-  p->vaddr = (char*)r;
+  // struct page *p = &pages[V2P((char*)r) / PGSIZE];
+  // p->vaddr = (char*)r;
   num_free_pages--;
   return (char*)r;
 }
