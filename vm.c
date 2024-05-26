@@ -307,7 +307,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       return 0;
     }
     add_to_lru(mem, pgdir);
-    pte_t *pte = walkpgdir(pgdir, a, 0);
+    pte_t *pte = walkpgdir(pgdir, (char*)a, 0);
     cprintf("ALLOC: va: %x, PTE: %x, pgdir: %x\n", a, *pte, pgdir);
   }
   return newsz;
