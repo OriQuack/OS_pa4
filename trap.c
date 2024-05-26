@@ -88,10 +88,9 @@ trap(struct trapframe *tf)
     uint pgva = rcr2();
     cprintf("PGFAULT: VA: %x ", pgva);
     char *fpaddr = (char*)PGROUNDDOWN(pgva);
-    struct page *p = 0;
     pte_t *pte;
     pde_t *pgdir = myproc()->pgdir;
-    if((pte = walkpgdir_(pgdir, (char*)pgva, 0)) == 0){
+    if((pte = walkpgdir_(pgdir, fpaddr, 0)) == 0){
       panic("Page fault: page table does not exist\n");
     }
     
