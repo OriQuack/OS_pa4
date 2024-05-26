@@ -425,8 +425,8 @@ copyuvm(pde_t *pgdir, uint sz)
       kfree(mem);
       goto bad;
     }
-    add_to_lru((void*)i, d);
-    cprintf("COPY: va: %x, PTE: %x, pgdir: %x\n", i, *pte, d);
+    add_to_lru((char*)i, d);
+    cprintf("COPY: va: %x, PTE: %x, pgdir: %x\n", (char*)i, *pte, d);
   }
   return d;
 
