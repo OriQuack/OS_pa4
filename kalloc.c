@@ -142,7 +142,7 @@ int evict(){
       return 0;
     }
     if(!(*pte & PTE_U)){
-      cprintf("Evicted VA: %x PTE: %x PGDIR: %x\n", va, *pte, pgdir);
+      // cprintf("Evicted VA: %x PTE: %x PGDIR: %x\n", va, *pte, pgdir);
       page_lru_head = page_lru_head->next;
       continue;
     }
