@@ -161,16 +161,12 @@ int evict(){
       cprintf("Evicted VA: %x mem: %x PTE: %x PGDIR: %x OFFSET: %d\n", va, mem, *pte, pgdir, offset);
       // va or pa??
       swapwrite(va, offset);
-      cprintf("SWAPWRITE DONE\n");
       kfree(mem);
-      cprintf("KFREE DONE\n");
       remove_from_lru(va, pgdir);
       
-      *pte = *pte & !PTE_P;
+      *pte = (*pte ^ PTE_P);
       *pte = (*pte & PTE_FLAGS(*pte)) | (offset << 12);
       cprintf("Changed pte: %x\n", *pte);
-      // TODO: pgdir 고려
-
       break;
     }
     page_lru_head = page_lru_head->next;
