@@ -161,7 +161,7 @@ int evict(){
       cprintf("Evicted VA: %x mem: %x PTE: %x PGDIR: %x OFFSET: %d\n", va, mem, *pte, pgdir, offset);
       // va or pa??
       swapwrite(va, offset);
-      kfree(va);
+      kfree(mem);
       remove_from_lru(va);
       
       *pte = *pte & !PTE_P;
