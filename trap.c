@@ -86,7 +86,7 @@ trap(struct trapframe *tf)
     break;
   case T_PGFLT:
     uint pgva = rcr2();
-    cprintf("PGFAULT VA: %x PA: %x\n", pgva, V2P(pgva));
+    cprintf("PGFAULT: VA: %x", pgva);
     char *fpaddr = (char*)PGROUNDDOWN(pgva);
     struct page *p = 0;
     for(int i = 0; i < PHYSTOP / PGSIZE; i++){
@@ -116,7 +116,7 @@ trap(struct trapframe *tf)
       kfree(mem);
       panic("Page fault: page table does not exist\n");
     }
-    cprintf("PTE: %x PGDIR: %x\n", *pte, pgdir);
+    cprintf("PGFAULT: PTE: %x PGDIR: %x\n", *pte, pgdir);
 
     int j = PTE_ADDR(*pte) / 8 % 8;
     int i = (PTE_ADDR(*pte) / 8 - j) / 8;

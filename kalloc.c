@@ -153,7 +153,7 @@ int evict(){
         continue;
       }
       int offset = add_to_swapspace();
-      cprintf("Evicted VA: %x PA: %x OFFSET: %d PGDIR: %x\n", va, PTE_ADDR(*pte), offset, pgdir);
+      cprintf("Evicted VA: %x pTE: %x PGDIR: %d OFFSET: %x\n", va, *pte, pgdir, offset);
       swapwrite(va, offset);
       kfree(va);
       remove_from_lru(va);
