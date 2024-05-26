@@ -141,6 +141,10 @@ int evict(){
       panic("pgtable does not exist");
       return 0;
     }
+    if(!(*pte & PTE_U)){
+      page_lru_head = page_lru_head->next;
+      continue;
+    }
     // Access bit 1
     if((*pte & PTE_A)){
       *pte = (*pte ^ PTE_A);

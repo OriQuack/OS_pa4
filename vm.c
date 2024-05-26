@@ -245,9 +245,9 @@ inituvm(pde_t *pgdir, char *init, uint sz)
   if(sz >= PGSIZE)
     panic("inituvm: more than a page");
   mem = kalloc();
-  add_to_lru(mem, pgdir);
   memset(mem, 0, PGSIZE);
   mappages(pgdir, 0, PGSIZE, V2P(mem), PTE_W|PTE_U);
+  add_to_lru(mem, pgdir);
   memmove(mem, init, sz);
 }
 
@@ -297,15 +297,14 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       return 0;
     }
     // cprintf("Alloc: %x PD: %x\n", mem, pgdir);
-    add_to_lru(mem, pgdir);
     memset(mem, 0, PGSIZE);
     if(mappages(pgdir, (char*)a, PGSIZE, V2P(mem), PTE_W|PTE_U) < 0){
       cprintf("allocuvm out of memory (2)\n");
       deallocuvm(pgdir, newsz, oldsz);
       kfree(mem);
-      remove_from_lru(mem);
       return 0;
     }
+    add_to_lru(mem, pgdir);
   }
   return newsz;
 }
@@ -417,13 +416,12 @@ copyuvm(pde_t *pgdir, uint sz)
     flags = PTE_FLAGS(*pte);
     if((mem = kalloc()) == 0)
       goto bad;
-    add_to_lru(mem, pgdir);
     memmove(mem, (char*)P2V(pa), PGSIZE);
     if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0) {
       kfree(mem);
-      remove_from_lru(mem);
       goto bad;
     }
+    add_to_lru(mem, pgdir);
   }
   return d;
 
