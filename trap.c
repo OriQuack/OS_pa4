@@ -86,11 +86,11 @@ trap(struct trapframe *tf)
     break;
   case T_PGFLT:
     uint pgva = rcr2();
-    cprintf("PGFAULT: VA: %x", pgva);
+    cprintf("PGFAULT: VA: %x ", pgva);
     char *fpaddr = (char*)PGROUNDDOWN(pgva);
     struct page *p = 0;
     for(int i = 0; i < PHYSTOP / PGSIZE; i++){
-      if((&pages[i])->vaddr == fpaddr){
+      if((&pages[i])->vaddr == fpaddr && (&pages[i])->pgdir == myproc()->pgdir){
         p = &pages[i];
         break;
       }
