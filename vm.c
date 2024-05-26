@@ -247,9 +247,9 @@ inituvm(pde_t *pgdir, char *init, uint sz)
   mem = kalloc();
   memset(mem, 0, PGSIZE);
   mappages(pgdir, 0, PGSIZE, V2P(mem), PTE_W|PTE_U);
-  add_to_lru(0, pgdir);
-  pte_t *pte = walkpgdir(pgdir, 0, 0);
-  cprintf("INIT: va: %x, PTE: %x, pgdir: %x\n", 0, *pte, pgdir);
+  // add_to_lru(0, pgdir);
+  // pte_t *pte = walkpgdir(pgdir, 0, 0);
+  // cprintf("INIT: va: %x, PTE: %x, pgdir: %x\n", 0, *pte, pgdir);
   memmove(mem, init, sz);
 }
 
@@ -306,9 +306,9 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       kfree(mem);
       return 0;
     }
-    add_to_lru((char*)a, pgdir);
-    pte_t *pte = walkpgdir(pgdir, (char*)a, 0);
-    cprintf("ALLOC: va: %x, PTE: %x, pgdir: %x\n", a, *pte, pgdir);
+    // add_to_lru((char*)a, pgdir);
+    // pte_t *pte = walkpgdir(pgdir, (char*)a, 0);
+    // cprintf("ALLOC: va: %x, PTE: %x, pgdir: %x\n", a, *pte, pgdir);
   }
   return newsz;
 }
@@ -386,7 +386,6 @@ clearpteu(pde_t *pgdir, char *uva)
 pde_t*
 copyuvm(pde_t *pgdir, uint sz)
 {
-  cprintf("CONPY");
   pde_t *d;
   pte_t *pte;
   uint pa, i, flags;
@@ -426,8 +425,8 @@ copyuvm(pde_t *pgdir, uint sz)
       kfree(mem);
       goto bad;
     }
-    add_to_lru((char*)i, d);
-    cprintf("COPY: va: %x, PTE: %x, pgdir: %x\n", (char*)i, *pte, d);
+    // add_to_lru((char*)i, d);
+    // cprintf("COPY: va: %x, PTE: %x, pgdir: %x\n", (char*)i, *pte, d);
   }
   return d;
 
