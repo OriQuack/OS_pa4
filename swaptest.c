@@ -28,6 +28,14 @@ int main () {
   }
 
   mem[0] = 3;
+  swapstat(&a, &b);
+  printf(1, "%d %d\n", a, b);
+  mem[4096] = 4;
+  swapstat(&a, &b);
+  printf(1, "%d %d\n", a, b);
+  mem[4096 * 2] = 89;
+  swapstat(&a, &b);
+  printf(1, "%d %d\n", a, b);
 
   printf(1, "PROGRAM DONE\n");
   exit();
