@@ -14,6 +14,8 @@ int main () {
 	int a, b;
   swapstat(&a, &b);
   printf(1, "%d %d\n", a, b);
+
+  char* mem = sbrk(4 * 1024 * 1024);
   
   for(int i = 0; i < 55; i++){
     sbrk(4 * 1024 * 1024);
@@ -24,6 +26,8 @@ int main () {
     swapstat(&a, &b);
     printf(1, "%d %d\n", a, b);
   }
+
+  mem[0] = 3;
 
   printf(1, "PROGRAM DONE\n");
   exit();

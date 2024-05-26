@@ -192,7 +192,6 @@ try_again:
     if(evict() == 0){
       return 0;
     }
-    cprintf("Done evict: %d %d\n", num_lru_pages, num_free_pages);
 	  goto try_again;
   }
   if(r)
