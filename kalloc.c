@@ -31,7 +31,6 @@ struct {
 } kmem;
 
 // MYCODE
-struct spinlock nfp_lock;
 struct spinlock nlp_lock;
 struct spinlock pages_lock;
 struct spinlock swap_lock;
@@ -39,7 +38,6 @@ struct spinlock swap_lock;
 struct page pages[PHYSTOP/PGSIZE];
 struct page *page_lru_head;
 char *swap_track;
-int num_free_pages;
 int num_lru_pages;
 
 // Initialization happens in two phases.
@@ -50,7 +48,6 @@ int num_lru_pages;
 void
 kinit1(void *vstart, void *vend)
 {
-  num_free_pages = 0;
   initlock(&kmem.lock, "kmem");
   kmem.use_lock = 0;
   freerange(vstart, vend);
@@ -95,9 +92,6 @@ kfree(char *v)
   if(kmem.use_lock)
     release(&kmem.lock);
   // MYCODE
-  acquire(&nfp_lock);
-  num_free_pages++;
-  release(&nfp_lock);
 }
 
 // MYCODE
@@ -119,7 +113,6 @@ void pages_init() {
   memset(mem, 0, PGSIZE);
   swap_track = mem;
 
-  initlock(&nfp_lock, "num_free_pages_lock");
   initlock(&nlp_lock, "num_lru_pages_lock");
   initlock(&pages_lock, "pages_lock");
   initlock(&swap_lock, "swaplock");
@@ -205,8 +198,5 @@ try_again:
   // MYCODE
   // struct page *p = &pages[V2P((char*)r) / PGSIZE];
   // p->vaddr = (char*)r;
-  acquire(&nfp_lock);
-  num_free_pages--;
-  release(&nfp_lock);
   return (char*)r;
 }

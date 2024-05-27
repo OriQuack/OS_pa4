@@ -9,7 +9,6 @@
 
 extern struct page pages[];
 extern struct page *page_lru_head;
-extern int num_free_pages;
 extern int num_lru_pages;
 extern char* swap_track;
 
