@@ -31,7 +31,10 @@ struct {
 } kmem;
 
 // MYCODE
-struct spinlock swap_lock;
+struct spinlock nfp_lock;
+struct spinlock nlp_lock;
+struct spinlock pages_lock;
+struct spinlock page_head_lock;
 
 struct page pages[PHYSTOP/PGSIZE];
 struct page *page_lru_head;
