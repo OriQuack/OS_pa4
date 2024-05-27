@@ -13,6 +13,11 @@ extern int num_free_pages;
 extern int num_lru_pages;
 extern char* swap_track;
 
+extern struct spinlock nfp_lock;
+extern struct spinlock nlp_lock;
+extern struct spinlock pages_lock;
+extern struct spinlock swap_lock;
+
 void remove_from_lru(char* mem, pde_t *pgadir);
 void add_to_lru(char *mem, pde_t *pgdir);
 void remove_from_swapspace(pte_t *pte);
@@ -487,46 +492,64 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
 
 void remove_from_lru(char* mem, pde_t *pgdir){
   pte_t *pte = walkpgdir(pgdir, mem, 0);
+
+  acquire(&pages_lock);
   struct page *p = &pages[PTE_ADDR(*pte) / PGSIZE];    
   p->prev->next = p->next;
   p->next->prev = p->prev;
   p->pgdir = 0;
   p->vaddr = 0;
+  release(&pages_lock);
+
+  acquire(&nlp_lock);
   num_lru_pages--;
+  relase(&nlp_lock);
+
+  acquire(&pages_lock);
   if(num_lru_pages == 0){
     page_lru_head = 0;
   }
   else if(page_lru_head == p){
     page_lru_head = page_lru_head->next;
   }
+  release(&pages_lock);
 }
 
 void add_to_lru(char *mem, pde_t *pgdir){
   pte_t *pte = walkpgdir(pgdir, mem, 0);
+
+  acquire(&pages_lock);
   struct page *p = &pages[PTE_ADDR(*pte) / PGSIZE];  
   if(page_lru_head == 0){
-    p->pgdir = pgdir;
     p->next = p->prev = p;
     page_lru_head = p;
   }
   else{
-    p->pgdir = pgdir;
     page_lru_head->prev->next = p;
     p->next = page_lru_head;
     p->prev = page_lru_head->prev;
     page_lru_head->prev = p;
   }
+  p->pgdir = pgdir;
   p->vaddr = mem;
+  release(&pages_lock);
+
+  acquire(&nlp_lock);
   num_lru_pages++;
+  release(&nlp_lock);
 }
 
 void remove_from_swapspace(pte_t *pte){
   int j = PTE_ADDR(*pte) / 8 % 8;
   int i = (PTE_ADDR(*pte) / 8 - j) / 8;
+  
+  acquire(&swap_lock);
   swap_track[i] &= ~(1 << j);
+  release(&swap_lock);
 }
 
 int add_to_swapspace() {
+  acquire(&swap_lock);
   int offset = -1;
   for(int i = 0; i < PGSIZE; i++){
     char bitmap = swap_track[i];
@@ -540,5 +563,6 @@ int add_to_swapspace() {
     if(offset != -1)
       break;
   }
+  release(&swap_lock);
   return offset;
 }

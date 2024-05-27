@@ -34,7 +34,7 @@ struct {
 struct spinlock nfp_lock;
 struct spinlock nlp_lock;
 struct spinlock pages_lock;
-struct spinlock page_head_lock;
+struct spinlock swap_lock;
 
 struct page pages[PHYSTOP/PGSIZE];
 struct page *page_lru_head;
@@ -95,7 +95,9 @@ kfree(char *v)
   if(kmem.use_lock)
     release(&kmem.lock);
   // MYCODE
+  acquire(&nfp_lock);
   num_free_pages++;
+  release(&nfp_lock);
 }
 
 // MYCODE
@@ -116,7 +118,11 @@ void pages_init() {
     panic("pages_init no memory");
   memset(mem, 0, PGSIZE);
   swap_track = mem;
-  // initlock(&swap_lock, "swaplock");
+
+  initlock(&nfp_lock, "num_free_pages_lock");
+  initlock(&nlp_lock, "num_lru_pages_lock");
+  initlock(&pages_lock, "pages_lock");
+  initlock(&swap_lock, "swaplock");
 }
 
 int evict(){
@@ -131,8 +137,12 @@ int evict(){
   //   p = p->next;
   // }
   while(1){
+    acquire(&pages_lock);
     pde_t *pgdir = page_lru_head->pgdir;
     char* va = page_lru_head->vaddr;
+    page_lru_head = page_lru_head->next;
+    release(&pages_lock);
+
     pte_t *pte;
     if((pte = walkpgdir_(pgdir, va, 0)) == 0){
       panic("pgtable does not exist");
@@ -140,13 +150,11 @@ int evict(){
     }
     // recheck
     if(!(*pte & PTE_U)){
-      page_lru_head = page_lru_head->next;
       continue;
     }
     // Access bit 1
     if((*pte & PTE_A)){
       *pte &= ~PTE_A;
-      page_lru_head = page_lru_head->next;
       continue;
     }
     // Access bit 0
@@ -166,7 +174,6 @@ int evict(){
       // cprintf("Changed pte: %x\n", *pte);
       break;
     }
-    page_lru_head = page_lru_head->next;
   }
   return 1;
 }
@@ -198,6 +205,8 @@ try_again:
   // MYCODE
   // struct page *p = &pages[V2P((char*)r) / PGSIZE];
   // p->vaddr = (char*)r;
+  acquire(&nfp_lock);
   num_free_pages--;
+  release(&nfp_lock);
   return (char*)r;
 }
