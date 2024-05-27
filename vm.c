@@ -503,7 +503,7 @@ void remove_from_lru(char* mem, pde_t *pgdir){
 
   acquire(&nlp_lock);
   num_lru_pages--;
-  relase(&nlp_lock);
+  release(&nlp_lock);
 
   acquire(&pages_lock);
   if(num_lru_pages == 0){
