@@ -227,6 +227,7 @@ fork(void)
 void
 exit(void)
 {
+  cprintf("EXIT START\n");
   struct proc *curproc = myproc();
   struct proc *p;
   int fd;
@@ -262,7 +263,6 @@ exit(void)
   }
 
   // Jump into the scheduler, never to return.
-  cprintf("EXIT DONE\n");
   curproc->state = ZOMBIE;
   sched();
   panic("zombie exit");
