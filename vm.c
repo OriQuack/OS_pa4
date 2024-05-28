@@ -338,8 +338,8 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
     if(!pte)
       a = PGADDR(PDX(a) + 1, 0, 0) - PGSIZE;
     // MYCODE: remove from swap space
-    else if(!(*pte & PTE_P)){
-      cprintf("REMOVE SWAPSPACE");
+    else if(!(*pte & PTE_P) && (*pte & PTE_U)){
+      cprintf("REMOVE SWAPSPACE\n");
       remove_from_swapspace(pte);
       *pte = 0;
     }
