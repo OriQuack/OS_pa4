@@ -38,7 +38,7 @@ int main () {
     exit();
   }
 
-  printf(1, "%d", mem[0]);
+  printf(1, "PARENT: %d\n", mem[0]);
   swapstat(&a, &b);
   printf(1, "%d %d\n", a, b);
   mem[4096] = 4;
