@@ -403,7 +403,6 @@ copyuvm(pde_t *pgdir, uint sz)
       panic("copyuvm: pte should exist");
 
     // MYCODE: copy in swap space
-    cprintf("PTE: %x\n", *pte);
     if(!(*pte & PTE_P) && (*pte & PTE_U)){
       cprintf("COPY SWAP\n");
       int offset = PTE_ADDR(*pte);
@@ -411,7 +410,9 @@ copyuvm(pde_t *pgdir, uint sz)
       char* m;
       if((m = kalloc()) == 0)
         goto bad;
+      cprintf("PTE: %x, offset: %d\n", *pte);
       swapread(m, offset);
+      
       offset = add_to_swapspace();
       swapwrite(m, offset);
       kfree(m);
