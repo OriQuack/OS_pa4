@@ -326,7 +326,6 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 int
 deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 {
-  cprintf("DEALLOC\n");
   pte_t *pte;
   uint a, pa;
 
@@ -354,7 +353,6 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       *pte = 0;
     }
   }
-  cprintf("DEALLOC DONE\n");
   return newsz;
 }
 
@@ -375,6 +373,7 @@ freevm(pde_t *pgdir)
     }
   }
   kfree((char*)pgdir);
+  cprintf("FREE VM DONE\n");
 }
 
 // Clear PTE_U on a page. Used to create an inaccessible
