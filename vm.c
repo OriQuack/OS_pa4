@@ -354,6 +354,7 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       *pte = 0;
     }
   }
+  cprintf("DEALLOC DONE\n");
   return newsz;
 }
 
