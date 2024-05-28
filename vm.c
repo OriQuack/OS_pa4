@@ -410,9 +410,9 @@ copyuvm(pde_t *pgdir, uint sz)
       char* m;
       if((m = kalloc()) == 0)
         goto bad;
-      cprintf("PTE: %x, offset: %d\n", *pte);
+      cprintf("PTE: %x, offset: %d\n", *pte, offset);
       swapread(m, offset);
-      
+
       offset = add_to_swapspace();
       swapwrite(m, offset);
       kfree(m);
