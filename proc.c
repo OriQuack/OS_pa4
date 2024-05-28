@@ -227,7 +227,6 @@ fork(void)
 void
 exit(void)
 {
-  cprintf("EXIT START\n");
   struct proc *curproc = myproc();
   struct proc *p;
   int fd;
@@ -264,7 +263,6 @@ exit(void)
 
   // Jump into the scheduler, never to return.
   curproc->state = ZOMBIE;
-  cprintf("EXIT DONE\n");
   sched();
   panic("zombie exit");
 }
@@ -277,6 +275,7 @@ wait(void)
   struct proc *p;
   int havekids, pid;
   struct proc *curproc = myproc();
+  cprintf("%s WAIT START\n", curproc->name);
   
   acquire(&ptable.lock);
   for(;;){
@@ -310,6 +309,7 @@ wait(void)
 
     // Wait for children to exit.  (See wakeup1 call in proc_exit.)
     sleep(curproc, &ptable.lock);  //DOC: wait-sleep
+    cprintf("%s WAIT DONE\n", curproc->name);
   }
 }
 
