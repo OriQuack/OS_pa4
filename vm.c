@@ -403,7 +403,7 @@ copyuvm(pde_t *pgdir, uint sz)
       panic("copyuvm: pte should exist");
 
     // MYCODE: copy in swap space
-    if(!(*pte & PTE_P)){
+    if(!(*pte & PTE_P) && (*pte & PTE_U)){
       cprintf("COPY SWAP\n");
       int offset = PTE_ADDR(*pte);
       int VMflags = PTE_FLAGS(*pte);
