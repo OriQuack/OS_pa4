@@ -157,7 +157,7 @@ int evict(){
       if(V2P(va) >= PHYSTOP) {
         mem = P2V(PTE_ADDR(*pte));
       }
-      // cprintf("Evicted VA: %x mem: %x PTE: %x PGDIR: %x OFFSET: %d\n", va, mem, *pte, pgdir, offset);
+      cprintf("Evicted VA: %x mem: %x PTE: %x PGDIR: %x OFFSET: %d\n", va, mem, *pte, pgdir, offset);
       swapwrite(va, offset);
       kfree(mem);
       remove_from_lru(va, pgdir);
