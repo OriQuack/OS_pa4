@@ -546,7 +546,7 @@ void remove_from_swapspace(pte_t *pte){
   int j = offset / 8 % 8;
   int i = (offset / 8 - j) / 8;
 
-  cprintf("REMOVE: %d\n", offset);
+  // cprintf("REMOVE: %d\n", offset);
   
   acquire(&swap_lock);
   swap_track[i] &= ~(1 << j);
