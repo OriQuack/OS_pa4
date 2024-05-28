@@ -29,14 +29,14 @@ int main () {
     printf(1, "%d %d\n", a, b);
   }
 
-  // if(fork() == 0){
-  //   printf(1, "CHILD: %d\n", mem[0]);
-  //   printf(1, "CHILD: %d\n", mem[4 * 1024 * 1024 * 4]);
-  //   swapstat(&a, &b);
-  //   printf(1, "%d %d\n", a, b);
-  //   printf(1, "CHILD EXIT\n");
-  //   exit();
-  // }
+  if(fork() == 0){
+    printf(1, "CHILD: %d\n", mem[0]);
+    printf(1, "CHILD: %d\n", mem[4 * 1024 * 1024 * 4]);
+    swapstat(&a, &b);
+    printf(1, "%d %d\n", a, b);
+    printf(1, "CHILD EXIT\n");
+    exit();
+  }
 
   mem[0] = 3;
   swapstat(&a, &b);
@@ -49,6 +49,6 @@ int main () {
   printf(1, "%d %d\n", a, b);
 
   printf(1, "**PROGRAM DONE**\n");
-  // wait();
+  wait();
   exit();
 }
