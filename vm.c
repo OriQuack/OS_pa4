@@ -417,7 +417,7 @@ copyuvm(pde_t *pgdir, uint sz)
       swapwrite(m, offset);
       kfree(m);
 
-      if(mapVMpages(pgdir, (void*)i, PGSIZE, offset, VMflags) < 0){
+      if(mapVMpages(pgdir, (void*)i, PGSIZE, (offset << 12), VMflags) < 0){
         goto bad;
       }
       continue;
