@@ -10,7 +10,7 @@
 
 
 int main () {
-  printf(1, "Start");
+  printf(1, "Start\n");
 	int a, b;
   swapstat(&a, &b);
   printf(1, "%d %d\n", a, b);
