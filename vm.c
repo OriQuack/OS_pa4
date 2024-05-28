@@ -338,18 +338,17 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
     if(!pte)
       a = PGADDR(PDX(a) + 1, 0, 0) - PGSIZE;
     // MYCODE: remove from swap space
-    else if((*pte & PTE_P) == 0 && (*pte & PTE_U)){
+    else if(!(*pte & PTE_P) && (*pte & PTE_U)){
       remove_from_swapspace(pte);
       *pte = 0;
     }
-    // remove from lru list
     else if((*pte & PTE_P) != 0){
       pa = PTE_ADDR(*pte);
       if(pa == 0)
         panic("kfree");
       char *v = P2V(pa);
-      kfree(v);
       remove_from_lru(v, pgdir);
+      kfree(v);
       *pte = 0;
     }
   }
@@ -373,7 +372,6 @@ freevm(pde_t *pgdir)
     }
   }
   kfree((char*)pgdir);
-  cprintf("FREE VM DONE\n");
 }
 
 // Clear PTE_U on a page. Used to create an inaccessible

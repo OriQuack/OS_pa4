@@ -34,6 +34,7 @@ int main () {
     printf(1, "CHILD: %d\n", mem[4 * 1024 * 1024 * 4]);
     swapstat(&a, &b);
     printf(1, "%d %d\n", a, b);
+    printf(1, "CHILD EXIT\n");
     exit();
   }
 
@@ -49,5 +50,6 @@ int main () {
 
   printf(1, "PROGRAM DONE\n");
   wait();
+  printf(2, "WAIT DONE\n");
   exit();
 }
