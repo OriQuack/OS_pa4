@@ -248,7 +248,9 @@ inituvm(pde_t *pgdir, char *init, uint sz)
 
   if(sz >= PGSIZE)
     panic("inituvm: more than a page");
-  mem = kalloc();
+  if((mem = kalloc()) == 0){
+    panic("inituvm: Out of memory\n");
+  }
   memset(mem, 0, PGSIZE);
   mappages(pgdir, 0, PGSIZE, V2P(mem), PTE_W|PTE_U);
   add_to_lru(0, pgdir);
@@ -324,6 +326,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 int
 deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 {
+  cprintf("DEALLOC\n");
   pte_t *pte;
   uint a, pa;
 
@@ -336,7 +339,7 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
     if(!pte)
       a = PGADDR(PDX(a) + 1, 0, 0) - PGSIZE;
     // MYCODE: remove from swap space
-    else if((*pte & PTE_P) == 0){
+    else if((*pte & PTE_P) == 0 && (*pte & PTE_U)){
       remove_from_swapspace(pte);
       *pte = 0;
     }
